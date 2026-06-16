@@ -86,9 +86,15 @@
      + TEMP,      ! Temperature at the start of the increment
      + DTEMP,     ! Increment of temperature
      + CELENT     ! Temperature
-      REAL(8), DIMENSION(1),          INTENT(IN) ::
+!<<<<<by Shiwei 2026/06/15
+!      REAL(8), DIMENSION(1),          INTENT(IN) ::
+!     + PREDEF,
+!     + DPRED
+!     the dimension of PREDEF was changed!
+      REAL(8), DIMENSION(*),          INTENT(IN) ::
      + PREDEF,
      + DPRED
+!<<<<<by Shiwei 2026/06/15
       REAL(8), DIMENSION(2),          INTENT(IN) ::
      + TIME       ! Step time/total time at begin, of the current inc.
       REAL(8), DIMENSION(3),          INTENT(IN) ::
@@ -186,7 +192,9 @@
               if (ip_init(NOEL,NPT)==0) then
 !
                   call initialize_atfirstinc(NOEL,NPT,COORDS,
-     + NPROPS,PROPS,TEMP,NSTATV,NTENS,STRESS)
+     + NPROPS,PROPS,TEMP,NSTATV,NTENS,STRESS,PREDEF)
+!                                              ^
+!<<<<<by Shiwei 2026/06/09---------------------|
 !
 !
 !                 write(*,*) 'element: ', NOEL

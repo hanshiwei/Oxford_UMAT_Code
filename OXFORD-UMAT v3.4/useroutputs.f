@@ -11,7 +11,9 @@
 !     -------------------------------------------------------------------------------
 !
 !     Flags for different outputs (22-30 custom outputs)
-      integer, public :: statev_outputs(30)
+      integer, public :: statev_outputs(40)
+!                                       ^
+!>>>>>By Shiwei 2026/06/10--------------|--changed to 40
 !
 !     Set the desired outputs by setting  0 / 1 
 !     in the "defineoutputs" subroutine in the below!
@@ -32,7 +34,10 @@
 !     *******************************************************
       subroutine defineoutputs
 !
-      use userinputs, only : maxnslip, maxnloop
+      use userinputs, only : maxnslip, maxnloop, nimpede
+!                                                    ^
+!<<<<<By Shiwei 2026/06/09---------------------------|
+!
 !
       implicit none
 !
@@ -109,7 +114,7 @@
 !
 !     17th State-variable output / number of outputs: maxnslip
 !     Backstress: statev_backstress
-      statev_outputs(17) = 0
+      statev_outputs(17) = 1
 !
 !     18th State-variable output / number of outputs: 1
 !     Total GND density
@@ -138,6 +143,8 @@
 !
 !     24-30 custom outputs
 !     Need to be defined here!
+      
+
       statev_outputs(24) = 0
       statev_outputs(25) = 0
       statev_outputs(26) = 0
@@ -147,7 +154,17 @@
       statev_outputs(30) = 0
 !
 !
-!
+!<<<<<By Shiwei 2026/06/10
+!     31 state-variable output / number of outputs: maxnslip*nimpede
+!     impeded strain (nimpede terms)
+      statev_outputs(31) = 1
+!<<<<<By Shiwei 2026/06/10
+      
+!<<<<<By Shiwei 2026/06/12
+!     32 state-variable output / number of outputs: maxnslip
+!     distance from integration point to grain boundary
+      statev_outputs(32) = 1
+!<<<<<By Shiwei 2026/06/12
 !
 !
 !
@@ -224,7 +241,20 @@
       if (statev_outputs(23)==1) then
           nstatv_outputs=nstatv_outputs+1
       endif
-!
+      
+!<<<<<By Shiwei 2026/06/09      
+!     nimpede terms of impeded strain for dislocation well model
+      if (statev_outputs(31)==1) then
+          nstatv_outputs=nstatv_outputs+maxnslip*nimpede
+      endif      
+!<<<<<By Shiwei 2026/06/09      
+
+!<<<<<By Shiwei 2026/06/12
+!     distance from intergration point to grain boundary
+      if (statev_outputs(32)==1) then
+          nstatv_outputs=nstatv_outputs+maxnslip
+      endif      
+!<<<<<By Shiwei 2026/06/12
 !
 !     Custom outputs need to be filled here!      
 !
@@ -266,11 +296,22 @@
 !
 !
       subroutine write_statev_legend
-      use userinputs, only : maxnslip, maxnloop
+      use userinputs, only : maxnslip, maxnloop, nimpede
+!                                                   ^
+!<<<<<By Shiwei 2026/06/09---------------------------
 !
 	implicit none
 !
-      integer count, i
+!<<<<<By Shiwei 2026/06/10
+!     variables for getting the directory of job
+      CHARACTER*512 OUTDIR
+      CHARACTER*256 JOBNAME
+      CHARACTER*512 FILENAME
+      
+      INTEGER LOUTDIR
+      INTEGER LJOBNAME
+!<<<<<By Shiwei 2026/06/10
+      integer count, i, k
       character*2 ij
 !
 !     Write the legend of the output variables (nstatv)
@@ -299,15 +340,32 @@
 !     22: Slip system activity (x maxnslip)
 !     23: Rotation (x 1)
 !     24-30: Custom outputs
-!
-!
-!
+!<<<<<By Shiwei 2026/06/10
+!     31£ºmulti-terms of impeded strain
+!<<<<<By Shiwei 2026/06/10
+!<<<<<By Shiwei 2026/06/12
+!     32£ºdistance from integration point to grain boundary
+!<<<<<By Shiwei 2026/06/12
 !
 !
 !
       count = 0
-      open(100,file='../STATEV_legend.txt',action='write',
+!<<<<<By Shiwei 2026/06/10      
+C     Get Abaqus output directory and job name
+      CALL GETOUTDIR(OUTDIR, LOUTDIR)
+      CALL GETJOBNAME(JOBNAME, LJOBNAME)
+
+C     File name: jobname_STATEV_legend.txt
+      FILENAME = OUTDIR(1:LOUTDIR) // '/' //
+     +           JOBNAME(1:LJOBNAME) // '_STATEV_legend.txt'
+         
+      open(100,file=FILENAME,action='write',
      + status='replace')
+      
+      ! original code will be commented
+!      open(100,file='../STATEV_legend.txt',action='write',
+!     + status='replace')
+!<<<<<By Shiwei 2026/06/10
 !
 !
 !
@@ -859,8 +917,49 @@
 !
 !
       endif
+
+!<<<<<By Shiwei 2026/06/09
+!     State variable-31
+      if (statev_outputs(31) == 1) then
 !
 !
+          do k= 1, nimpede
+          do i = 1, maxnslip
+!
+              count = count + 1
+!
+              write(100,'(A7,I3,A24,I3,A15,I3,A4)')
+     +        'STATEV-', count,
+     +        ':   Impede strain term-', k,
+     +        ', slip system-', i,
+     +        ' [-]'
+!
+          end do
+          end do
+!
+!
+!
+      endif
+!<<<<<By Shiwei 2026/06/09
+!<<<<<By Shiwei 2026/06/12
+!     State variable-32
+      if (statev_outputs(32) == 1) then
+!
+          do i = 1, maxnslip
+!
+              count = count + 1
+!
+!
+!
+              write(100,'(A7,I3,A29,I2,A6)')
+     + 'STATEV-', count, 
+     + ':   distance to gb -',  i,  ' [mm]'
+!
+          end do
+!
+!
+      endif
+!<<<<<By Shiwei 2026/06/12
       close(100)
 !
 !
@@ -885,8 +984,15 @@
      + statev_tausolute, statev_totgammasum,
      + statev_gammasum, statev_gammadot,
      + statev_tauceff, statev_ssd, statev_loop, statev_gnd_t,
-     + statev_forest, statev_plasdiss, statev_theta
-      use userinputs, only: maxnslip, maxnloop
+     + statev_forest, statev_plasdiss, statev_theta, statev_GamImp,
+     + statev_dist2gb
+!                ^
+!<<<<<<By Shiwei 2026/06/12
+!                                                             ^
+!<<<<<<By Shiwei 2026/06/09-----------------------------------|
+      use userinputs, only: maxnslip, maxnloop, nimpede
+!                                                   ^
+!<<<<<<By Shiwei 2026/06/09-------------------------|
       use utilities, only: matvec9
       use miscellaneous, only: FatemiSocieParameter,
      + SlipSystemActivity, ProjectLatticeStrain
@@ -900,7 +1006,7 @@
 !     Values of state variables
       real(8), intent(inout) :: statev(nstatv)
 !     Other variables
-      integer :: i, j
+      integer :: i, j, k
       real(8) :: d6(6), d9(9), d1
       real(8) :: gnd(maxnslip*2)
       real(8) :: eps, SSA(maxnslip)
@@ -929,6 +1035,12 @@
 !     22: Active Slip Systems (x maxnslip)
 !     23: Rotation (x 1)
 !     24-30: Custom outputs
+!<<<<<By Shiwei 2026/06/10
+!     31£ºmulti-terms of impeded strain
+!<<<<<By Shiwei 2026/06/10
+!<<<<<By Shiwei 2026/06/12
+!     32£ºdistance from ip to gb
+!<<<<<By Shiwei 2026/06/12
 !
 !
 !     Reset the counter
@@ -1205,7 +1317,30 @@
 !
 !     Custom state variables 22-30
 !     Please add custom outputs here!
-!
+
+!<<<<<By Shiwei 2026/06/10
+!     31£ºmulti-terms of impeded strain
+
+      if (statev_outputs(31)==1) then
+          do K = 1, nimpede
+          do j = 1, maxnslip
+              i = i + 1
+              statev(i) = statev_GamImp(noel,npt,j,k)
+          end do
+          end do
+      end if
+!<<<<<By Shiwei 2026/06/10
+      
+!<<<<<By Shiwei 2026/06/12
+!     32£ºdistance from ip to GB
+
+      if (statev_outputs(32)==1) then
+          do j = 1, maxnslip
+              i = i + 1
+              statev(i) = statev_dist2gb(noel,npt,j)
+          end do
+      end if
+!<<<<<By Shiwei 2026/06/12
 !
 !
 !

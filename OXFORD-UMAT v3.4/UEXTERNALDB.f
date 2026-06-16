@@ -10,7 +10,10 @@
 !     Subroutine for initialization 
       use initializations, only : initialize_variables,
      + initialize_once 
-      use userinputs, only : gndmodel, backstressmodel, neighbourhood
+      use userinputs, only : gndmodel, backstressmodel, neighbourhood,
+     + bpredef
+!         ^
+!<<<<<by Shiwei 2026/06/10
       use globalvariables, only: numel, numpt, 
      + init_once, statev_gmatinv, statev_gmatinv_t,
      + statev_gammasum_t, statev_gammasum,
@@ -28,7 +31,10 @@
      + statev_backstress, statev_backstress_t,
      + statev_plasdiss, statev_plasdiss_t, 
      + statev_theta_t, statev_theta, 
-     + ip_count, calculategradient, ip_init, grad_init
+     + ip_count, calculategradient, ip_init, grad_init,
+     + statev_GamImp_t, statev_GamImp 
+!                 ^               ^
+!<<<<<<by Shiwei 2026/06/10
 !
       use straingradients, only: gndmodel1, gndmodel2, 
      + gndmodel3, gndmodel4
@@ -54,8 +60,33 @@
 !
       integer :: i
 !
+!<<<<<by Shiwei 2026/06/10
+      integer :: debugwait
+      LOGICAL :: first_debug
+
+      data debugwait /1/
+      data first_debug /.true./
 !
+      
+      !     turn VS debugger on/off on 2026/05/06
+!      if (first_debug) then
 !
+!          write(6,*) '========================================='
+!          write(6,*) 'UEXTERNALDB is waiting for Visual Studio debugger'
+!          write(6,*) 'Attach to standard.exe, then set debugwait = 0'
+!          write(6,*) '========================================='
+!          call flush(6)
+!
+!          do while (debugwait .eq. 1)
+!!             Keep waiting here
+!              read(5,*) debugwait
+!          end do
+!
+!          first_debug = .false.
+!
+!      endif
+!<<<<<by Shiwei 2026/06/10
+      
 !     at the start of the analysis (only ONCE!)
 !     if there are initializations/calculations that are needed once,
 !     and that are independepent of element properties, you may use here.
@@ -136,6 +167,28 @@
                   write(*,*) 'one-time initialization is complete!'
 !
 !
+!<<<<<by Shiwei 2026/06/10
+!                 information about backstress model selection
+                  write(*,*) '--------------------------------'
+                  if (backstressmodel==0) then
+                      write(*,*) '==>No backstress model is used.'
+                  elseif (backstressmodel==1) then
+                      write(*,*) '==>Backstress model-1 is used.'
+                  elseif (backstressmodel==2) then
+                      write(*,*) '==>Backstress model-2 is used.'
+                  else if (backstressmodel==11) then
+                      write(*,*) '==>Dislocation well model is used.'
+                      if (bpredef) then                          
+                          write(*,'(A)')
+     +    '    PREDEF is imported to form the distance related '//
+     +    'dislocation well model.'
+                      else
+                          write(*,'(A)')
+     +    '    PREDEF is NOT imported to form the distance related '//
+     +    'dislocation well model.'
+                      end if
+                  end if
+!<<<<<by Shiwei 2026/06/10   
                   write(*,*) '--------------------------------'
 !
 !
@@ -144,6 +197,8 @@
 !
 !                 message for initializatoin
                   write(*,*) '7. "STATEV_legend.txt" file is ready!'
+
+               
 !
 !                 set the one-time initilaziation flag (at the very end)
                   init_once=1
@@ -322,7 +377,11 @@
           statev_backstress_t(:,:,:) = statev_backstress(:,:,:)
           statev_plasdiss_t(:,:) = statev_plasdiss(:,:)
           statev_theta_t(:,:) = statev_theta(:,:)
-!
+          
+!<<<<<By Shiwei 2026/06/10
+!         Update the Impeded strain (can be multiple terms)
+          statev_GamImp_t(:,:,:,:) = statev_GamImp(:,:,:,:)
+!<<<<<By Shiwei 2026/06/10
           write(*,*) 'States are updated!'
 !
           write(*,*) '--------------------------------'

@@ -171,7 +171,10 @@ C
 C         RESET SVD (STRESS, STRAIN, DAMAGE)
           K=0
           DO I =1,NSVARS
-              SVARS(K)=0.
+!<<<<<By Shiwei 2024/06/09
+!              SVARS(K)=0.
+              SVARS(I)=0.
+!<<<<<By Shiwei 2024/06/09
           END DO
 C
 C         WRITE/OUTPUT AND INITIAL CHECK  
@@ -815,7 +818,11 @@ C     COHESIVE MODEL FOR ONLY-OPENING MODE FAILURE
      + DAMAGE,T,DTDDELTA)
 C     COMMENT OUT THE IMPLICIT NONE
 C     OTHERWISE MACAULEY FUNCTION DOES NOT WORK
-C      IMPLICIT NONE
+!<<<<<By Shiwei 2024/06/09
+!     "implicit none" was commented out by original developer
+      IMPLICIT NONE
+      REAL(8), EXTERNAL :: MACAULEY
+!<<<<<By Shiwei 2024/06/09      
       INTEGER, INTENT(IN) :: MCRD
       REAL(8), DIMENSION(MCRD), INTENT(IN) :: DELTA
       REAL(8), INTENT(IN) :: DAMAGE0
@@ -1015,7 +1022,11 @@ C     COHESIVE MODEL FOR ONLY-SHEAR MODE FAILURE
      + DAMAGE,T,DTDDELTA)
 C     COMMENT OUT THE IMPLICIT NONE
 C     OTHERWISE MACAULEY FUNCTION DOES NOT WORK
-C      IMPLICIT NONE
+!<<<<<By Shiwei 2024/06/09
+!     "implicit none" was commented out by original developer
+      IMPLICIT NONE
+      REAL(8), EXTERNAL :: MACAULEY
+!<<<<<By Shiwei 2024/06/09   
       INTEGER, INTENT(IN) :: MCRD
       REAL(8), DIMENSION(MCRD), INTENT(IN) :: DELTA
       REAL(8), INTENT(IN) :: DAMAGE0
@@ -1216,7 +1227,11 @@ C     COHESIVE MODEL FOR MIXED MODE
      + DAMAGE,T,DTDDELTA)
 C     COMMENT OUT THE IMPLICIT NONE
 C     OTHERWISE MACAULEY FUNCTION DOES NOT WORK
-C      IMPLICIT NONE
+!<<<<<By Shiwei 2024/06/09
+!     "implicit none" was commented out by original developer
+      IMPLICIT NONE
+      REAL(8), EXTERNAL :: MACAULEY
+!<<<<<By Shiwei 2024/06/09   
       INTEGER, INTENT(IN) :: MCRD
       REAL(8), DIMENSION(MCRD), INTENT(IN) :: DELTA
       REAL(8), INTENT(IN) :: DAMAGE0

@@ -326,6 +326,16 @@
       real(8), allocatable, public :: statev_backstress(:,:,:)
 !     Backstress per slip system at former time step
       real(8), allocatable, public :: statev_backstress_t(:,:,:)
+
+!<<<<<By Shiwei 2026/06/09
+!     distance from material integration to grain boundary (independent of time)
+      real(8), allocatable, public :: statev_dist2gb(:,:,:)
+!     Impeded strain at current time step      
+      real(8), allocatable, public :: statev_GamImp(:,:,:,:)
+!     Impeded strain at former time step            
+      real(8), allocatable, public :: statev_GamImp_t(:,:,:,:)
+!     
+!<<<<<By Shiwei 2026/06/09
 !
 !     -------------------------------------------------------------------------------
 !

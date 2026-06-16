@@ -212,5 +212,116 @@
 !
       end subroutine backstressmodel2
 !
+
+!<<<<<by Shiwei 2026/06/09
+!     dislocation well model
+!     activate this backstress model by setting variable backstressmodel = 11 in userinputs.f
+!     
+!     Two input parameters are required
+      subroutine dislocationwellmodel(backstressparam, nslip, X, gdot,
+     + dt, dX, GamImp_t, GamImp, dGamImp, CapImp)
+      use userinputs, only : maxnparam,nimpede,bpredef
+      use errors, only : error
+
+      implicit none
+!     Inputs
+!     Backstress parameters
+      real(8), intent(in) :: backstressparam(maxnparam)
+!     Number of slip systems
+      integer, intent(in) :: nslip
+!     Current value of slip rate
+      real(8), intent(in) :: gdot(nslip)
+!     Current value of backstress
+      real(8), intent(in) :: X(nslip)
+!     time increment
+      real(8), intent(in) :: dt
+!     impeded shear strain on each slip system converged at time t
+      real(8), intent(in) :: GamImp_t(nslip,nimpede)
+!     (trial) impeded shear strain on each slip system from outer iteration
+      real(8), intent(in) :: GamImp(nslip,nimpede)
+!     Capcity of total impeded strain on each slip system 
+      real(8), intent(in) :: CapImp(nslip,nimpede)    
+!     Output
+!     Backtress increment
+      real(8), intent(out) :: dX(nslip)
+!     increment of the impeded shear strain on each slip system
+      real(8), intent(out) :: dGamImp(nslip,nimpede)
+
+      
+!     Variables used in this subroutine
+!     hardening moduli
+      real(8) :: c
+      
+!     percentage 1st term
+      real(8) :: f
+!     impeded strain capacity
+      real(8) :: h
+!     tunneling index
+      real(8) :: q
+
+      
+      integer :: is,k
+      
+      real(8) :: signHeav
+      real(8) :: gamImpRatAbs,gamImpCoe,GamImpTri
+      
+
+!     Hardening moduli
+      c = backstressparam(1)
+      
+!
+      dX = 0.
+      
+      
+      do k=1,nimpede
+          f=   backstressparam(1+(K-1)*3+1)          
+          !h=   backstressparam(1+(K-1)*3+2)
+          q=1./backstressparam(1+(K-1)*3+3)
+          do is=1,nslip
+              
+              h=CapImp(is,k)    
+              !  check if h is less than or equal to 0, if so, throw an error    
+              if (h <= 0.) then
+                  call error(101)
+              end if    
+              
+              !   Heaviside symbol H(gammadot*f*gammaImp)
+              signHeav = 0.
+              if ((gdot(is)*GamImp(is,k))>0.) then
+                  signHeav=1.
+              end if 
+              
+              !   |gammaImp/h|
+              gamImpRatAbs=abs(GamImp(is,k)/h)
+              
+              !   
+              if (gamImpRatAbs>=1.) then
+                  gamImpCoe= signHeav       
+              else 
+                  gamImpCoe= gamImpRatAbs**q*signHeav
+              end if
+              !   [1 - |gammaImp/h|^q*Heaviside(gammadot*GamImp)]*GammaDot*fraction
+              dGamImp(is,K)=(1.- gamImpCoe)*gdot(is)*dt*f
+              
+              !   avoid the overshoot of the impeded strain
+              !   if Gimp + dGimp > h or <-h, then dGimp should be adjusted accordingly
+              GamImpTri = GamImp_t(is,K) + dGamImp(is,K)
+              
+              if (GamImpTri > +h) GamImpTri = +h
+              if (GamImpTri < -h) GamImpTri = -h
+              
+              dGamImp(is,K) = GamImpTri - GamImp_t(is,K)
+              
+              !   form the backstress by linear hardening moduli
+              dX(is) = dX(is) + C*dGamImp(is,K)
+    !         
+              
+          end do
+      end do
+!
+!
+      return
+      end subroutine dislocationwellmodel
+!<<<<<by Shiwei 2026/06/09
 !
       end module backstress

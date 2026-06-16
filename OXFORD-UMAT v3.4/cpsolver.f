@@ -42,11 +42,18 @@
      + irradiationparam_all, backstressparam_all, slip2screw_all,
      + statev_backstress_t, statev_backstress, statev_plasdiss_t,
      + statev_plasdiss, statev_theta_t, statev_theta,
-     + statev_tauceff, statev_Fr, I3, I6, smallnum
-!
+     + statev_tauceff, statev_Fr, I3, I6, smallnum,
+     + statev_dist2gb, statev_GamImp_t, statev_GamImp
+!                 ^              ^                ^
+!<<<<<By Shiwei 2026/06/09-------|----------------|
+      
       use userinputs, only: constanttemperature, temperature,
      + predictor, maxnslip, maxnparam, maxxcr, cutback,
-     + phi, maxnloop, stateupdate, readresidualstrainfile, tres
+     + phi, maxnloop, stateupdate, readresidualstrainfile, tres,
+     + nimpede, bpredef
+!         ^        ^
+!         |        |
+!<<<<<By Shiwei 2026/06/09
 !
 !
       use usermaterials, only: materialparam
@@ -356,6 +363,14 @@
       real(8) :: X_t(numslip_all(matid))
 !     Backstress backup solution
       real(8) :: X0(numslip_all(matid))
+      
+!<<<<<By Shiwei 2026/06/09
+      real(8) :: dist2gb(numslip_all(matid))
+      
+      real(8) :: GamImp_t(numslip_all(matid), nimpede)
+      real(8) :: GamImp(numslip_all(matid), nimpede)
+      real(8) :: CapImp(numslip_all(matid), nimpede)
+!<<<<<By Shiwei 2026/06/09      
 !
 !
 !
@@ -395,7 +410,12 @@
       real(8) :: notused8, notused9
 !
 !     counter
-      integer :: is, i, j
+      integer :: is, i, j,k
+!<<<<<By Shiwei 2026/06/09      
+!     parameters for hyperbolic function
+      real(8) :: a_dwm, b_dwm, c_dwm, prod
+!<<<<<By Shiwei 2026/06/09      
+      
 !
 !
 !
@@ -478,6 +498,14 @@
       gmatinv_0 = statev_gmatinv_0(noel,npt,:,:)
 !     Backstress at former time step
       X_t = statev_backstress_t(noel,npt,1:nslip)
+      
+!<<<<<By Shiwei 2026/06/09
+!     fetch the distance to grain boundary from statev_dist2gb (on slip system)
+!     (independent of time)
+      dist2gb(:) = statev_dist2gb(noel, npt, 1:nslip)
+!     fetch impeded shear strain at former time step
+      GamImp_t = statev_GamImp_t(noel, npt, 1:nslip, 1:nimpede)
+!<<<<<By Shiwei 2026/06/09
 !
 !     residual deformation gradient
       Fr0=statev_Fr(noel,npt,:,:)
@@ -508,6 +536,8 @@
       imodel = irradiationmodel_all(matid)
       iparam = irradiationparam_all(matid,1:maxnparam)
       bparam = backstressparam_all(matid,1:maxnparam)
+      
+
 !
 !
 !
@@ -547,8 +577,33 @@
       end if
 !
 !
-!
-!
+!<<<<<By Shiwei 2026/06/09
+!     calculate capacity of impeded strain
+      if (bpredef) then
+          !   capacity of impeded strain related with distance to grain boundary
+          do k=1,nimpede
+              !   the parameters for distance related dislocation well model
+              !   check the parameters for backstress model in 'usermaterial.f'
+              a_dwm=bparam(1+3*nimpede+3*(K-1)+1)!5.0e-4
+              b_dwm=bparam(1+3*nimpede+3*(K-1)+2)!800.0
+              c_dwm=bparam(1+3*nimpede+3*(K-1)+3)!1.0e-5
+              do is=1,nslip
+                  prod = b_dwm*dist2gb(is)
+                  !   to avoid overflow
+                  if (abs(prod) > 50.0d0) then
+                      CapImp(is,k) = c_dwm
+                  else
+                      CapImp(is,k) = a_dwm/cosh(prod) + c_dwm
+                  end if
+                  !CapImp(is,k) = 2.0*a_dwm/(EXP(+prod)+EXP(-prod))+c_dwm
+              end do
+          end do
+      else
+          do k=1,nimpede
+              CapImp(:,k) = bparam(1+(k-1)*3+2)
+          end do
+      endif 
+!<<<<<By Shiwei 2026/06/09
 !
 !     Slip directions in the sample reference
       call rotateslipsystems(phaid,nslip,caratio,
@@ -841,6 +896,9 @@
           tausolute=tausolute_t
           Fp=Fp_t
           X=X_t
+!<<<<By Shiwei 2026/06/09
+          GamImp=GamImp_t
+!<<<<By Shiwei 2026/06/09
           cpconv=1
           cpconv0=0
 !
@@ -950,13 +1008,13 @@
      + tauceff_t, tauc_t, rhotot_t,
      + sumrhotot_t, ssdtot_t,
      + rhofor_t, forest_t, substructure_t,
-     + gnd_t, ssd_t, loop_t, X_t,
+     + gnd_t, ssd_t, loop_t, X_t, GamImp_t,!<<<<<By Shiwei 2026/06/09-----------|
      + dt, L, W, dstran,
      + Fp, gmatinv, Eec,
      + gammadot, gammasum, totgammasum, 
      + evmp, plasdiss, theta,
      + tauceff, tauc, tausolute,
-     + ssdtot, ssd, loop, X,
+     + ssdtot, ssd, loop, X, GamImp, CapImp, !<<<<<By Shiwei 2026/06/09-----------|
      + forest, substructure,
      + sigma, jacobi, cpconv)
 !
@@ -1014,6 +1072,11 @@
       statev_gmatinv(noel,npt,1:3,1:3)=gmatinv
 !     Backstress
       statev_backstress(noel,npt,1:nslip)=X
+      
+!<<<<<By Shiwei 2026/06/09
+      statev_GamImp(noel, npt, 1:nslip,1:nimpede)=GamImp
+!<<<<<By Shiwei 2026/06/09
+      
 !     Plastic dissipation power density
       statev_plasdiss(noel,npt)=plasdiss
 !     Rotation
@@ -1075,13 +1138,13 @@
      + tauceff_t, tauc_t, rhotot_t,
      + sumrhotot_t, ssdtot_t, rhofor_t,
      + forest_t, substructure_t,
-     + gnd_t, ssd_t, loop_t, X_t,
+     + gnd_t, ssd_t, loop_t, X_t, GamImp_t, !<<<<By Shiwei 2026/06/09
      + dt, L, W, dstran,
      + Fp, gmatinv, Eec,
      + gammadot, gammasum, totgammasum, 
      + evmp, plasdiss, theta,
      + tauceff, tauc, tausolute,
-     + ssdtot, ssd, loop, X,
+     + ssdtot, ssd, loop, X, GamImp, CapImp,        !<<<<By Shiwei 2026/06/09
      + forest, substructure,
      + sigma, jacobi, cpconv)
 !
@@ -1089,7 +1152,9 @@
 !
       use userinputs, only : maxniter, maxnparam, maxnloop,
      + tauctolerance , SVDinversion,
-     + backstressmodel, stateupdate, inversebackup
+     + backstressmodel, stateupdate, inversebackup,nimpede
+!                                                     ^
+!<<<<<By Shiwei 2026/06/09----------------------------|
 !
       use innerloop, only : Dunne_innerloop, Hardie_innerloop
 !
@@ -1101,7 +1166,9 @@
 !
       use hardening, only: hardeningrules
 !
-      use backstress, only: backstressmodel1
+      use backstress, only: backstressmodel1,dislocationwellmodel
+!                                                    ^
+!<<<<<By Shiwei on 2026/06/09------------------------|
 !
       use crss, only: slipresistance, totalandforest
 !
@@ -1223,6 +1290,12 @@
       real(8), intent(in) :: loop_t(maxnloop)
 !     backstress at former time step
       real(8), intent(in) :: X_t(nslip)
+!<<<<<By Shiwei on 2026/06/09
+!     Impeded strain at former time step for dislocation well model
+      real(8), intent(in) :: GamImp_t(nslip,nimpede)
+      
+      real(8), intent(in) :: CapImp(nslip,nimpede)
+!<<<<<By Shiwei on 2026/06/09
 !     time increment
       real(8), intent(in) :: dt
 !     total velocity gradient at the current time step
@@ -1274,6 +1347,10 @@
       real(8), intent(out) :: loop(maxnloop)
 !     crss at the current time step
       real(8), intent(out) :: X(nslip)
+!<<<<<By Shiwei on 2026/06/09
+!     Impeded strain at current time step for dislocation well model
+      real(8), intent(out) :: GamImp(nslip,nimpede)
+!<<<<<By Shiwei on 2026/06/09
 !     Cauchy stress
       real(8), intent(out) :: sigma(6)
 !     material tangent
@@ -1387,6 +1464,9 @@
 !
 !     backstress increment
       real(8) :: dX(nslip)    
+
+!     impeded strain increment
+      real(8) :: dGamImp(nslip,nimpede)
 !
 !     total ssd density increment
       real(8) :: dssdtot
@@ -1442,6 +1522,9 @@
       loop = loop_t
       rhofor = rhofor_t
       X = X_t
+!<<<<<By Shiwei 2026/06/09
+      GamImp=GamImp_t
+!<<<<<By Shiwei 2026/06/09
       forest = forest_t
       substructure = substructure_t
 !
@@ -1749,6 +1832,18 @@
               X = X_t + dX
 !
           end if
+
+!<<<<<By Shiwei on 2026/06/09
+!         backstress model for dislocation well model
+          if (backstressmodel==11) then
+              
+              call dislocationwellmodel(backstressparam,
+     + nslip,X,gammadot,dt,dX,GamImp_t, GamImp, dGamImp, CapImp)
+              
+              X = X_t + dX
+              GamImp = GamImp_t + dGamImp
+          end if
+!<<<<<By Shiwei on 2026/06/09
 !
 !
 !         increment iteration no.

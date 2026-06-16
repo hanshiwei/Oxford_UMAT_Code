@@ -156,6 +156,14 @@
 !          write(*,*) 'ERROR-022: inversion in predictor did not work'
 !          write(*,*) ''
 !          write(*,*) '**********************************************'
+!<<<<<By Shiwei on 2026/06/09
+      else if (errorid.eq.101) then
+          write(*,*) '*******************ERROR*******************'
+          write(*,*) 'ERROR-101: capacity for impeded strain <= 0.!'
+          write(*,*) 'Exiting!'
+          write(*,*) '*******************************************'
+          call xit
+!<<<<<By Shiwei on 2026/06/09    
       else
           write(*,*) '*******************ERROR*******************'
           write(*,*) 'ERROR-???: Unknown error!'

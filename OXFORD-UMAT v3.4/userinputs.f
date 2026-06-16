@@ -189,8 +189,22 @@
 !     1: Local backstress model (Armstron-Frederick)
 !     2: Non-local backstress model based on GNDs
 !     (2 will only be effect in case any of the GND model is active)
+!<<<<<by Shiwei 2026/06/09
+!     11: dislocation well model from S. HAN, et al., 2018
+!<<<<<by Shiwei 2026/06/09
+
 !     Default value is set to 0
-      integer, parameter, public :: backstressmodel = 0
+      integer, parameter, public :: backstressmodel = 11
+      
+!<<<<<by Shiwei 2026/06/09
+!     number of impeded terms for dislocation well model
+      integer, parameter, public :: nimpede = 2
+      
+!     Flag for using variable PREDEF as distance related dislocation well model
+      logical, parameter, public :: bpredef = .true.
+      
+!<<<<<by Shiwei 2026/06/09
+      
 !
 !
 !     Temperature flag

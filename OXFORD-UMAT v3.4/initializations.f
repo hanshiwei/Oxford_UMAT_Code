@@ -187,10 +187,12 @@
 !
 !     Subroutines that need to run once at the beginning of calculations
       subroutine initialize_atfirstinc(noel,npt,coords,nprops,
-     + props,temp,nstatv,ntens,stress)
+     + props,temp,nstatv,ntens,stress,predef)
+!                                        ^
+!<<<<<by Shiwei 2026/06/09---------------|      
       use userinputs, only: constanttemperature, temperature,
      + maxnslip, maxnparam, maxnmaterial, maxnloop,
-     + backstressmodel, readmaterialfile
+     + backstressmodel, readmaterialfile, bpredef
       use globalvariables, only: Euler, materialid,
      + featureid, phaseid, ipcoords, numdim,
      + statev_gmatinv, statev_gmatinv_t, ip_init,
@@ -216,7 +218,11 @@
      + irradiationmodel_all, irradiationparam_all,
      + sintmat1_all, sintmat2_all,
      + hintmat1_all, hintmat2_all,
-     + backstressparam_all 
+     + backstressparam_all,
+     + statev_dist2gb
+!                ^
+!<<<<<by Shiwei 2026/06/09
+      
 !
       use irradiation, only: calculateintmats4irradmodel2
       use usermaterials, only: materialparam
@@ -244,6 +250,12 @@
       integer, intent(in) :: ntens
 !     Stress tensor
       real(8), intent(in) :: stress(ntens)
+      
+!<<<<<by Shiwei 2026/06/09      
+!     predefined field variables
+      real(8), intent(in) :: predef(*)
+!<<<<<by Shiwei 2026/06/09
+      
 !
 !     Internal variables
 !     Flag for reading from PROPS vector
@@ -869,7 +881,17 @@
 !     Initialize total ssd density
       statev_substructure(noel,npt)=substructure_0
       statev_substructure_t(noel,npt)=substructure_0
-!
+      
+!<<<<<by Shiwei 2026/06/09
+!     if bpredef is set to 1, then the predefined field variable will be used to
+!     calculate the distance related variable-capacity of the impeded strain
+      if (bpredef) then
+          do is=1,nslip
+              !   use PREDEF as the distance related variable for the dislocation well model
+              statev_dist2gb(noel,npt,is) = predef(is)
+          end do
+      end if
+!<<<<<by Shiwei 2026/06/09
 !
 !
 !
@@ -1078,10 +1100,16 @@
      + statev_backstress, statev_plasdiss_t,
      + statev_theta, statev_theta_t, randnum,
      + statev_plasdiss, statev_tauceff, statev_Fr,
-     + numneigh, eleneigh, iptneigh, facneigh
+     + numneigh, eleneigh, iptneigh, facneigh,
+     + statev_dist2gb, statev_GamImp, statev_GamImp_t 
+!                ^               ^              ^
+!<<<<By Shiwei---|---------------|--------------|
+
 !
       use userinputs, only : maxnslip, maxnparam,
-     + maxnmaterial, maxnloop, maxneigh
+     + maxnmaterial, maxnloop, maxneigh, nimpede
+!                                           ^
+!<<<<<by Shiwei 2026/06/09------------------| 
       implicit none
       integer i, j, k
 !
@@ -1311,6 +1339,18 @@
       statev_backstress=0.
       allocate(statev_backstress_t(numel,numpt,maxnslip))
       statev_backstress_t=0.
+      
+!<<<<<By Shiwei 2026/06/09
+!     initialize distance to grain boundary for each slip system
+      allocate(statev_dist2gb(numel,numpt, maxnslip))
+      statev_dist2gb=0.
+!     initialize Impeded Strain for each slip system 
+      allocate(statev_GamImp(numel,numpt, maxnslip, nimpede))
+      statev_GamImp=0.
+!     initialize Impeded Strain for each slip system at current time step
+      allocate(statev_GamImp_t(numel,numpt, maxnslip, nimpede))
+      statev_GamImp_t=0.
+!<<<<<By Shiwei 2026/06/09    
 !
 !     Material parameters
       allocate(caratio_all(maxnmaterial))
