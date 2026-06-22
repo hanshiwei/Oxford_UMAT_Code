@@ -90,11 +90,11 @@
 !
 !     11th State-variable output / number of outputs: maxnslip
 !     Slip rate: statev_gammadot
-      statev_outputs(11) = 0
+      statev_outputs(11) = 1
 !
 !     12nd State-variable output / number of outputs: maxnslip
 !     Critical Resolved Shear Stress: statev_tauc
-      statev_outputs(12) = 0
+      statev_outputs(12) = 1
 !
 !     13rd State-variable output / number of outputs: maxnslip
 !     Statistically-Stored Dislocation Density: statev_ssd

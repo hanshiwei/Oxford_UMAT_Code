@@ -455,7 +455,7 @@
 !          xtauc1 = 32.
 !
 !         Copper
-          xtauc1 = 16.
+          xtauc1 = 30.0
 !
 !!         Inverse slip test parameter
 !          xtauc1 = 32.
@@ -560,8 +560,18 @@
 !
 !
 !
-!         hardening model
-          hardeningmodel = 0
+!         hardening model-integral type voce model
+          hardeningmodel = 1
+!         
+!         Hardening rate - h0
+          hardeningparam(1)=250.
+!         Saturation strength for slip - ss
+          hardeningparam(2)=20.
+!         Hardening exponent - a
+          hardeningparam(3)=1.0
+!         Latent hardening coefficient - q
+          hardeningparam(4)=1.4
+          
 !
 !!     Kocks-Mecking hardening with substructure evolution
 !!     Reference: https://doi.org/10.1016/j.actamat.2010.06.021
@@ -588,13 +598,13 @@
 !
 !         copper          
 !         Hardening rate - h0
-          hardeningparam(1)=250.
+          !hardeningparam(1)=250.
 !         Saturation strength for slip - ss
-          hardeningparam(2)=190.
+          !hardeningparam(2)=190.
 !         Hardening exponent - a
-          hardeningparam(3)=2.5
+          !hardeningparam(3)=2.5
 !         Latent hardening coefficient - q
-          hardeningparam(4)=1.4
+          !hardeningparam(4)=1.4
 !
 !
 !!         steel
@@ -629,31 +639,31 @@
           
 !<<<<<By Shiwei 2026/06/09
 !         testing embeded A-F model
-          !backstressparam(1) = 10000.0
-          !backstressparam(2) = 100.0
+          !backstressparam(1) = 100000.0
+          !backstressparam(2) = 1000.0
           
           !dislocation well model
           
           !backstressparam(1) = 800860.0   !   mouduli: dsw_c
-          backstressparam(1) = 286000.0   !   mouduli: dsw_c
+          backstressparam(1) = 100000.0   !   mouduli: dsw_c
           
-          backstressparam(2) = 0.672      !   1st term: dsw_f1 (fraction)
-          backstressparam(3) = 0.0004585  !   1st term: dsw_h1->using constant capacity
+          backstressparam(2) = 0.5      !   1st term: dsw_f1 (fraction)
+          backstressparam(3) = 0.0005  !   1st term: dsw_h1->using constant capacity
           backstressparam(4) = 0.5879     !   1st term: dsw_p1
           
-          backstressparam(5) = 0.328      !   2nd term: dsw_f2 (fraction)
-          backstressparam(6) = 0.000258   !   2nd term: dsw_h2->using constant capacity
+          backstressparam(5) = 0.5      !   2nd term: dsw_f2 (fraction)
+          backstressparam(6) = 0.0002   !   2nd term: dsw_h2->using constant capacity
           backstressparam(7) = 0.34       !   2nd term: dsw_p2
-          !
-!         we are using hyperbolic secant function for capacity of impeded strain
-!         h=2*a/(exp(+bx)+exp(-bx))+c
-          backstressparam(8) = 5.0e-4     !   1st term: a->nominator 
-          backstressparam(9) = 800.0      !   1st term: b->exponent
-          backstressparam(10)= 1.0e-5     !   1st term: c->constant
-          
-          backstressparam(11) = 5.0e-4    !   2nd term: a->nominator 
-          backstressparam(12) = 800.0     !   2nd term: b->exponent
-          backstressparam(13)= 1.0e-5     !   2nd term: c->constant
+!          !
+!!         we are using hyperbolic secant function for capacity of impeded strain
+!!         h=2*a/(exp(+bx)+exp(-bx))+c
+!          backstressparam(8) = 5.0e-4     !   1st term: a->nominator 
+!          backstressparam(9) = 800.0      !   1st term: b->exponent
+!          backstressparam(10)= 1.0e-5     !   1st term: c->constant
+!          
+!          backstressparam(11) = 5.0e-4    !   2nd term: a->nominator 
+!          backstressparam(12) = 800.0     !   2nd term: b->exponent
+!          backstressparam(13)= 1.0e-5     !   2nd term: c->constant
           
 !<<<<<By Shiwei 2026/06/09          
 !

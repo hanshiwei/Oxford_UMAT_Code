@@ -24,6 +24,8 @@
      + drhosub, dssd, dloop)
       use globalvariables, only : KB
       use userinputs, only: maxnparam, maxnloop
+      use errors, only: error
+      
       implicit none
 !
 !     INPUTS
@@ -134,6 +136,10 @@
       integer :: nloop
 !     Parameters for Voce typ hardening model
       real(8) :: h0, ss, m, q, hb(nslip), Hab(nslip,nslip)
+!<<<<<By Shiwei 2026/06/16
+      real(8) :: voce_arg, voce_pow
+      real(8), parameter :: voce_tol = 1.0d-14
+!<<<<<By Shiwei 2026/06/16
 !     Parameter for linear hardening model
       real(8) :: k
 !     Parameters for Kocks-Mecking hardening model
@@ -244,9 +250,22 @@
           hb=0.
           do is = 1,nslip
 !
-              hb(is) = h0*(1.-tauc(is)/ss)**m*
-     + absgammadot(is)*dt
+!<<<<<By Shiwei 2026/06/17
+!             original code
+!              hb(is) = h0*(1.-tauc(is)/ss)**m*
+!     + absgammadot(is)*dt
 !
+!             sign was introduced in the code
+              voce_arg = 1.0d0 - tauc(is)/ss
+              
+              if (abs(voce_arg) < voce_tol) then
+                  voce_pow = 0.0d0
+              else
+                  voce_pow = voce_arg * abs(voce_arg)**(m - 1.0d0)
+              endif
+              
+              hb(is) = h0 * voce_pow * absgammadot(is) * dt
+!<<<<<By Shiwei 2026/06/17
 !
 !
 !
@@ -512,7 +531,6 @@
 		  
 !
           drhotot = sum(dssd)
-!
 !
 !
 !
