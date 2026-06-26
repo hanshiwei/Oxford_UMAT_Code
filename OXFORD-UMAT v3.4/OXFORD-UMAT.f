@@ -60,8 +60,11 @@
 !
       use userinputs, only: cutback, pastefront
       use globalvariables, only: numel, numpt, numtens,
-     + largenum, ip_init, init_once, ip_count
-      use initializations, only: initialize_atfirstinc   
+     + largenum, ip_init, init_once, ip_count, restart_analysis
+      use initializations, only: initialize_atfirstinc,
+     + initialize_restart_statev
+!                    ^ 
+!<<<<<By Shiwei 2026/06/23
       use cpsolver, only: solve
       implicit none
 !   
@@ -196,7 +199,12 @@
 !                                              ^
 !<<<<<by Shiwei 2026/06/09---------------------|
 !
-!
+!<<<<<By Shiwei 2026/06/23
+                  if (restart_analysis) then
+                      call initialize_restart_statev(noel,npt,coords,
+     + nprops,props,temp,statev,nstatv)
+                  endif 
+!<<<<<By Shiwei 2026/06/23
 !                 write(*,*) 'element: ', NOEL
 !                 write(*,*) 'ip: ', NPT
 !                 write(*,*) 'initialized!'

@@ -60,7 +60,9 @@
       use userinputs, only: maxnumel, maxnumpt
       use globalvariables, only : time_old,
      + dt_t, calculategradient, numpt, numel,
-     + ip_count, init_once, grad_init
+     + ip_count, init_once, grad_init, restart_analysis
+!                                             ^
+!>>>>>By Shiwei 2026/06/23--------------------|
 !
 !     Use this instead of data statements
       time_old=0.
@@ -80,6 +82,10 @@
 !
 !     flag for initialization once at the beginning
       init_once=0
+      
+!>>>>>By Shiwei 2026/06/23      
+      restart_analysis = .false.
+!>>>>>By Shiwei 2026/06/23      
 !
       return
       end subroutine initialize_variables
@@ -219,9 +225,10 @@
      + sintmat1_all, sintmat2_all,
      + hintmat1_all, hintmat2_all,
      + backstressparam_all,
-     + statev_dist2gb
-!                ^
-!<<<<<by Shiwei 2026/06/09
+     + statev_dist2gb, restart_analysis
+!                ^             ^
+!<<<<<by Shiwei 2026/06/09     |
+!<<<<<by Shiwei 2026/06/24-----|
       
 !
       use irradiation, only: calculateintmats4irradmodel2
@@ -885,7 +892,7 @@
 !<<<<<by Shiwei 2026/06/09
 !     if bpredef is set to 1, then the predefined field variable will be used to
 !     calculate the distance related variable-capacity of the impeded strain
-      if (bpredef) then
+      if (bpredef.AND.(.NOT.restart_analysis)) then
           do is=1,nslip
               !   use PREDEF as the distance related variable for the dislocation well model
               statev_dist2gb(noel,npt,is) = predef(is)
@@ -1066,6 +1073,380 @@
       end subroutine initialize_atfirstinc
 !
 !
+!<<<<<By Shiwei 2026/06/23
+!     Subroutines that recover data from statev for *restart analysis
+      subroutine initialize_restart_statev(noel,npt,coords,nprops,
+     + props,temp,statev,nstatv)
+      use userinputs, only: maxnslip,maxnloop,nimpede
+      use globalvariables, only: Euler, materialid,
+     + featureid, phaseid, ipcoords, numdim,
+     + statev_gmatinv, statev_gmatinv_t, ip_init,
+     + numslip_all, numscrew_all, phaseid_all,
+     + statev_tauc, statev_tauc_t, statev_gmatinv_0,
+     + forestproj_all, slip2screw_all, screw_all,
+     + statev_gmatinv, statev_gmatinv_t,
+     + statev_evmp, statev_evmp_t, 
+     + statev_maxx, statev_maxx_t,
+     + statev_Eec, statev_Eec_t,
+     + statev_curvature,
+     + statev_backstress, statev_backstress_t,
+     + statev_ssdtot, statev_ssdtot_t,
+     + statev_substructure,statev_substructure_t,
+     + statev_tausolute, statev_tausolute_t,
+     + statev_totgammasum,statev_totgammasum_t,
+     + statev_gammasum, statev_gammasum_t,
+     + statev_gammadot, statev_gammadot_t,
+     + statev_ssd, statev_ssd_t,
+     + statev_loop, statev_loop_t,
+     + statev_gnd,statev_gnd_t,
+     + statev_forest, statev_forest_t,
+     + statev_plasdiss, statev_plasdiss_t,
+     + statev_sigma,statev_sigma_t,
+     + statev_Fp, statev_Fp_t,
+     + statev_Fth, statev_Fth_t,
+     + statev_theta, statev_theta_t,
+     + statev_GamImp, statev_GamImp_t, statev_dist2GB 
+
+!>>>>>Shiwei 2026/05/07
+      use useroutputs, only: checkoutputs, 
+     + statev_outputs, nstatv_outputs
+      
+!<<<<<Shiwei 2026/05/07
+      implicit none
+!     Element number
+      integer, intent(in) :: noel
+!     Integration point
+      integer, intent(in) :: npt
+!     Number of properties
+      integer, intent(in) :: nprops
+!     Ip coordinates
+      real(8), intent(in) :: coords(3)
+!     State variables
+      real(8), intent(in) :: props(nprops)
+!     Abaqus temperature
+      real(8), intent(in) :: temp
+!     Number of state variables
+      integer, intent(in) :: nstatv
+!     state variables
+      real(8), intent(in) :: statev(nstatv)
+      
+      integer :: i,J,k,idx,row,col
+      
+      integer :: matid, nslip
+      
+      !     Material id
+      matid = int(props(5))
+      !     Initialize number of slip systems
+      nslip = numslip_all(matid)
+      
+      !write(*,*)'***********************************************'
+      !write(*,*)' Make sure that the corresponding statevs have '
+      !write(*,*)' been written to the odb file for restart work '
+      !write(*,*)'***********************************************'
+      
+      i = 0
+      !   g mat inv rotation matrix     
+      if (statev_outputs(1)==1) then
+          do row=1,3
+              do col=1,3
+                  i=i+1
+                  statev_gmatinv_t(noel, npt, row,col)=statev(i)
+                  statev_gmatinv(noel, npt, row,col)  =statev(i)
+              end do
+          end do
+      end if
+      
+      !   effective plastic strain 
+      if (statev_outputs(2)==1) then
+          i=i+1
+          statev_evmp_t(noel, npt)=statev(i)
+          statev_evmp(noel, npt)  =statev(i)
+      end if
+      
+!     Maxium ratio of rss to crss (x1)
+      if (statev_outputs(3)==1) then
+          i=i+1
+          statev_maxx_t(noel,npt) = statev(i)  
+          statev_maxx(noel,npt)   = statev(i)  
+      end if
+
+      !     State variable-4
+!     Elastic strain in crystal frame (x6)
+      if (statev_outputs(4)==1) then
+          do j = 1, 6
+              i = i + 1
+              statev_Eec_t(noel,npt,j) = statev(i) 
+              statev_Eec(noel,npt,j) = statev(i) 
+          end do
+      end if
+!
+!
+!     State variable-5
+!     Lattice curvature (x9)
+      if (statev_outputs(5)==1) then
+          do j = 1, 9
+              i = i + 1
+              statev_curvature(noel,npt,j)   = statev(i)
+          end do
+      end if
+!
+!
+!     State variable-6
+!     SSD total (x1)
+      if (statev_outputs(6)==1) then
+          i = i + 1
+          statev_ssdtot_t(noel,npt) = statev(i) 
+          statev_ssdtot(noel,npt)   = statev(i) 
+      end if
+!
+!
+!
+!     State variable-7
+!     Substructure density (x1)
+      if (statev_outputs(7)==1) then
+          i = i + 1
+          statev_substructure_t(noel,npt) = statev(i)
+          statev_substructure(noel,npt)   = statev(i)
+      end if
+!
+!
+!     State variable-8
+!     Solute strength (x1)
+      if (statev_outputs(8)==1) then
+          i = i + 1
+          statev_tausolute_t(noel,npt) = statev(i)   
+          statev_tausolute(noel,npt) = statev(i)      
+      end if
+!
+!
+!     State variable-9
+!     Cumulative slip (x1)
+      if (statev_outputs(9)==1) then
+          i = i + 1
+          statev_totgammasum_t(noel,npt) = statev(i)
+          statev_totgammasum(noel,npt) = statev(i)  
+      end if
+!
+!
+!     State variable-10
+!     Total slip per slip system (x maxnslip)
+      if (statev_outputs(10)==1) then
+          do j = 1, maxnslip
+              i = i + 1
+              statev_gammasum_t(noel,npt,j) = statev(i)
+              statev_gammasum(noel,npt,j) = statev(i)
+          end do
+      end if
+!
+!
+!     State variable-11
+!     Slip rates per slip system (x maxnslip)
+      if (statev_outputs(11)==1) then
+          do j = 1, maxnslip
+              i = i + 1
+              statev_gammadot_t(noel,npt,j) = statev(i)
+              statev_gammadot(noel,npt,j) = statev(i)
+          end do
+      end if
+!
+!     State variable-12
+!     CRSS (x maxnslip)
+      if (statev_outputs(12)==1) then
+          do j = 1, maxnslip
+              i = i + 1
+              statev_tauc_t(noel,npt,j) = statev(i)
+              statev_tauc(noel,npt,j) = statev(i)
+          end do
+      end if    
+!
+!
+!     State variable-13
+!     SSD (x maxnslip) 
+      if (statev_outputs(13)==1) then
+          do j = 1, maxnslip
+              i = i + 1
+              statev_ssd_t(noel,npt,j) = statev(i)
+              statev_ssd(noel,npt,j) = statev(i)
+          end do
+      end if
+!
+!
+!     State variable-14
+!     GND (x maxnslip)       
+      if (statev_outputs(14)==1) then
+          do j = 1, maxnslip*2
+              i = i + 1
+              statev_gnd_t(noel,npt,j) = statev(i)
+              statev_gnd(noel,npt,j) = statev(i)
+          end do
+      end if
+!
+!
+!     State variable-15
+!     Forest density (x maxnslip)       
+      if (statev_outputs(15)==1) then
+          do j = 1, maxnslip
+              i = i + 1
+              statev_forest_t(noel,npt,j) = statev(i)
+              statev_forest(noel,npt,j) = statev(i)
+          end do
+      end if
+!
+!     State variable-16
+!     Loop density (x maxnloop)       
+      if (statev_outputs(16)==1) then
+          do j = 1, maxnloop
+              i = i + 1
+              statev_loop(noel,npt,j) = statev(i)
+              statev_loop_t(noel,npt,j) = statev(i)
+          end do
+      end if
+!
+!
+!     State variable-17
+!     Backstress (x maxnslip)       
+      if (statev_outputs(17)==1) then
+          do j = 1, maxnslip
+              i = i + 1
+              statev_backstress(noel,npt,j) = statev(i)
+              statev_backstress_t(noel,npt,j) = statev(i)
+          end do
+      end if
+!
+!     State variable-18
+!     GND total (x1)
+      if (statev_outputs(18)==1) then
+!
+          i = i + 1
+          
+!>>>>>No related statev_xxxx to copy but it is in statev
+          !check the corresponding lines in 'useroutputs.f'
+!>>>>>No related statev_xxxx to copy but it is in statev
+!
+      end if
+!
+!     State variable-19
+!     Plastic dissipation power density (x1)
+      if (statev_outputs(19)==1) then
+          i = i + 1          
+          statev_plasdiss(noel,npt) = statev(i)
+          statev_plasdiss_t(noel,npt) = statev(i)
+      end if
+!
+!     State variable-20
+!     Fatemi Socie parameter (x1)
+      if (statev_outputs(20)==1) then
+!
+          i = i + 1
+!>>>>>No related statev_xxxx to copy but it is in statev
+          !check the corresponding lines in 'useroutputs.f'
+!>>>>>No related statev_xxxx to copy but it is in statev
+      end if
+
+!
+!     State variable-21
+!     Lattice strain projections along hkl (x1)
+      if (statev_outputs(21)==1) then
+!
+          i = i + 1
+!>>>>>No related statev_xxxx to copy but it is in statev
+!         !check the corresponding lines in 'useroutputs.f' 
+!>>>>>No related statev_xxxx to copy but it is in statev
+      end if
+!
+!
+!     State variable-22
+!     Slip system activity (x maxnslip)       
+      if (statev_outputs(22)==1) then
+!
+!         calculate the active slip systems
+!>>>>>No related statev_xxxx to copy but it is in statev
+!         !check the corresponding lines in 'useroutputs.f' 
+!>>>>>No related statev_xxxx to copy but it is in statev
+!
+      end if
+!
+!
+!     State variable-23
+!     Rotation
+      if (statev_outputs(23)==1) then
+!
+          i = i + 1
+!>>>>>No related statev_xxxx to copy but it is in statev
+          statev_theta(noel,npt) = statev(i)
+          statev_theta_t(noel,npt) = statev(i)
+!>>>>>No related statev_xxxx to copy but it is in statev
+!
+      end if
+!
+!     Custom state variables 22-30
+!     Please add custom outputs here!
+
+
+!     31£ºmulti-terms of impeded strain
+
+      if (statev_outputs(31)==1) then
+          do K = 1, nimpede
+          do j = 1, maxnslip
+              i = i + 1
+              statev_GamImp(noel,npt,j,k) = statev(i)
+              statev_GamImp_t(noel,npt,j,k) = statev(i)
+          end do
+          end do
+      end if
+
+!     32£ºdistance from ip to GB along slip direction
+
+      if (statev_outputs(32)==1) then
+          do j = 1, maxnslip
+              i = i + 1
+              statev_dist2gb(noel,npt,j) = statev(i)
+          end do
+      end if
+
+!     stress sigma
+      if (statev_outputs(33)==1) then
+          do k=1,6
+              i=i+1
+              statev_sigma_t(noel,npt,k) = statev(i)
+              statev_sigma(noel,npt,k) = statev(i)
+          end do          
+      end if
+
+!     Fp plastic deformation gradient
+      if (statev_outputs(34)==1) then
+!         
+          do row=1,3
+              do col=1,3
+!
+                  i = i + 1
+                  statev_Fp_t(noel,npt,row,col) = statev(i)
+                  statev_Fp(noel,npt,row,col) = statev(i)
+!
+              end do        
+          end do
+
+      end if
+      
+!     Fth thermal deformation gradient    
+      if (statev_outputs(35)==1) then
+!
+          do row=1,3
+              do col=1,3
+!
+                  i = i + 1
+                  statev_Fth_t(noel,npt,row,col) = statev(i)
+                  statev_Fth(noel,npt,row,col) = statev(i)
+              end do
+          end do         
+      end if
+                
+      
+      
+      return
+      end subroutine initialize_restart_statev
+      
+!<<<<<By Shiwei 2026/06/23
 !
 !     Arrays allocated
       subroutine allocate_arrays

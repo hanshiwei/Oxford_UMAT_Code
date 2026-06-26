@@ -566,7 +566,7 @@
 !         Hardening rate - h0
           hardeningparam(1)=250.
 !         Saturation strength for slip - ss
-          hardeningparam(2)=20.
+          hardeningparam(2)=35.
 !         Hardening exponent - a
           hardeningparam(3)=1.0
 !         Latent hardening coefficient - q
@@ -645,7 +645,7 @@
           !dislocation well model
           
           !backstressparam(1) = 800860.0   !   mouduli: dsw_c
-          backstressparam(1) = 100000.0   !   mouduli: dsw_c
+          backstressparam(1) = 10000.0   !   mouduli: dsw_c
           
           backstressparam(2) = 0.5      !   1st term: dsw_f1 (fraction)
           backstressparam(3) = 0.0005  !   1st term: dsw_h1->using constant capacity
@@ -657,13 +657,13 @@
 !          !
 !!         we are using hyperbolic secant function for capacity of impeded strain
 !!         h=2*a/(exp(+bx)+exp(-bx))+c
-!          backstressparam(8) = 5.0e-4     !   1st term: a->nominator 
-!          backstressparam(9) = 800.0      !   1st term: b->exponent
-!          backstressparam(10)= 1.0e-5     !   1st term: c->constant
-!          
-!          backstressparam(11) = 5.0e-4    !   2nd term: a->nominator 
-!          backstressparam(12) = 800.0     !   2nd term: b->exponent
-!          backstressparam(13)= 1.0e-5     !   2nd term: c->constant
+          backstressparam(8) = 5.0e-4     !   1st term: a->nominator 
+          backstressparam(9) = 800.0      !   1st term: b->exponent
+          backstressparam(10)= 1.0e-5     !   1st term: c->constant
+          
+          backstressparam(11) = 5.0e-4    !   2nd term: a->nominator 
+          backstressparam(12) = 800.0     !   2nd term: b->exponent
+          backstressparam(13)= 1.0e-5     !   2nd term: c->constant
           
 !<<<<<By Shiwei 2026/06/09          
 !

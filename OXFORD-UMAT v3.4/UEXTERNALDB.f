@@ -14,6 +14,7 @@
      + bpredef
 !         ^
 !<<<<<by Shiwei 2026/06/10
+
       use globalvariables, only: numel, numpt, 
      + init_once, statev_gmatinv, statev_gmatinv_t,
      + statev_gammasum_t, statev_gammasum,
@@ -32,9 +33,10 @@
      + statev_plasdiss, statev_plasdiss_t, 
      + statev_theta_t, statev_theta, 
      + ip_count, calculategradient, ip_init, grad_init,
-     + statev_GamImp_t, statev_GamImp 
-!                 ^               ^
-!<<<<<<by Shiwei 2026/06/10
+     + statev_GamImp_t, statev_GamImp, restart_analysis 
+!                 ^               ^               ^
+!<<<<<<by Shiwei 2026/06/10-------|               |      
+!<<<<<<by Shiwei 2026/06/23------------------------
 !
       use straingradients, only: gndmodel1, gndmodel2, 
      + gndmodel3, gndmodel4
@@ -133,8 +135,10 @@
 !
 !
 !         in case of force BC
-          if ((KINC==1).and.(KSTEP==1)) then
-!
+          !if ((KINC==1).and.(KSTEP==1)) then
+!         ^
+!         commented out
+!<<<<<By Shiwei 2026/06/23
 !             
 !             
 !             check if the one-time initialization is done or not
@@ -203,7 +207,10 @@
 !                 set the one-time initilaziation flag (at the very end)
                   init_once=1
 !
-              end if
+          !end if
+!         ^
+!         commented out
+!<<<<<By Shiwei 2026/06/23
 !
 !
 !
@@ -221,8 +228,10 @@
 !
 !
 !         in case of displacement BC
-          if ((KINC==1).and.(KSTEP==1)) then
-!
+          !if ((KINC==1).and.(KSTEP==1)) then
+!         ^
+!         commented out
+!<<<<<By Shiwei 2026/06/24
 !             
 !             
 !             check if the one-time initialization is done or not
@@ -277,8 +286,10 @@
 !
 !
 !
-          end if
-
+          !end if
+!         ^
+!         commented out
+!<<<<<By Shiwei 2026/06/24
 !
 !
 !
@@ -389,7 +400,16 @@
 !
       endif
 !
-!
+!<<<<<By Shiwei 2026/06/23
+!     at the beginning of a restart analysis
+      if (LOP==4) then
+          write(*,*)'LOP==4-restart',init_once,numel,numpt
+          
+          call initialize_variables
+          
+          restart_analysis=.true.
+      end if
+!<<<<<By Shiwei 2026/06/23
 !
       RETURN
       END SUBROUTINE UEXTERNALDB

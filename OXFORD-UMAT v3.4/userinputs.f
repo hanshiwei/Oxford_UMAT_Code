@@ -201,7 +201,7 @@
       integer, parameter, public :: nimpede = 2
       
 !     Flag for using variable PREDEF as distance related dislocation well model
-      logical, parameter, public :: bpredef = .false.
+      logical, parameter, public :: bpredef = .true.
       
 !<<<<<by Shiwei 2026/06/09
       

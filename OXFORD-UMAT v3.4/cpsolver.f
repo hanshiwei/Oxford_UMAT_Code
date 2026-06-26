@@ -496,6 +496,11 @@
       gmatinv_t = statev_gmatinv_t(noel,npt,:,:)
 !     Initial orientation
       gmatinv_0 = statev_gmatinv_0(noel,npt,:,:)
+!<<<<<By Shiwei 2026/06/23      
+!     This variable was not updated in the whole program.
+!     And it was initialized in subroutine initializeatfirstinc using Euler angles.
+!<<<<<By Shiwei 2026/06/23
+      
 !     Backstress at former time step
       X_t = statev_backstress_t(noel,npt,1:nslip)
       
@@ -509,6 +514,10 @@
 !
 !     residual deformation gradient
       Fr0=statev_Fr(noel,npt,:,:)
+!<<<<<By Shiwei 2026/06/23      
+!     Fr0 is the residual deformation gradient which is imported from files
+!     Check the subroutine 'readfiles()' in 'initializations.f'
+!<<<<<By Shiwei 2026/06/23
 !
 !     Material parameters are constant
       caratio = caratio_all(matid)

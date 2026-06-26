@@ -185,6 +185,11 @@
 !
 !     Global one-time initialization flag
       integer, public              ::	 init_once
+
+!<<<<<By Shiwei 2026/06/23
+!     Restart analysis flag
+      logical, public              ::  restart_analysis      
+!<<<<<By Shiwei 2026/06/23
 !
 !     Global one-time initialization flag
       integer, public              ::	 grad_init

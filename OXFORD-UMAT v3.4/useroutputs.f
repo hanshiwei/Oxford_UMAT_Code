@@ -50,11 +50,11 @@
 !
 !     1st State-variable output / number of outputs: 9
 !     Crystal to Sample tranformation: statev_gmatinv
-      statev_outputs(1) = 0
+      statev_outputs(1) = 1
 !
 !     2nd State-variable output / number of outputs: 1
 !     Equivalent Von-Mises plastic total strain: statev_evmp
-      statev_outputs(2) = 0
+      statev_outputs(2) = 1
 !
 !     3rd State-variable output / number of outputs: 1
 !     Maximum ratio of rss to crss: statev_maxx
@@ -62,7 +62,7 @@
 !
 !     4th State-variable output / number of outputs: 6
 !     Elastic strains in the crystal frame: statev_Eec
-      statev_outputs(4) = 0
+      statev_outputs(4) = 1
 !
 !     5th State-variable output / number of outputs: 9
 !     Lattice curvature: statev_curvature
@@ -70,19 +70,19 @@
 !
 !     6th State-variable output / number of outputs: 1
 !     Total statistically-stored dislocation density: statev_ssdtot
-      statev_outputs(6) = 0
+      statev_outputs(6) = 1
 !
 !     7th State-variable output / number of outputs: 1
 !     Substructure dislocation density: statev_substructure
-      statev_outputs(7) = 0
+      statev_outputs(7) = 1
 !
 !     8th State-variable output / number of outputs: 1
 !     Solute strength: statev_tausolute
-      statev_outputs(8) = 0
+      statev_outputs(8) = 1
 !
 !     9th State-variable output / number of outputs: 1
 !     Cumulative slip: statev_totgammasum
-      statev_outputs(9) = 0
+      statev_outputs(9) = 1
 !
 !     10th State-variable output / number of outputs: maxnslip
 !     Total slip per slip system: statev_gammasum
@@ -98,19 +98,19 @@
 !
 !     13rd State-variable output / number of outputs: maxnslip
 !     Statistically-Stored Dislocation Density: statev_ssd
-      statev_outputs(13) = 0
+      statev_outputs(13) = 1
 !
 !     14th State-variable output / number of outputs: maxnslip*2
 !     Geometrically Necessary Dislocation Density: statev_gnd
-      statev_outputs(14) = 0
+      statev_outputs(14) = 1
 !
 !     15th State-variable output / number of outputs: maxnslip
 !     Foresty Dislocation Density: statev_forest
-      statev_outputs(15) = 0
+      statev_outputs(15) = 1
 !
 !     16th State-variable output / number of outputs: maxnloop
 !     Defect Loop Density: statev_loop
-      statev_outputs(16) = 0
+      statev_outputs(16) = 1
 !
 !     17th State-variable output / number of outputs: maxnslip
 !     Backstress: statev_backstress
@@ -121,8 +121,8 @@
       statev_outputs(18) = 0
 !
 !     19th State-variable output / number of outputs: 1
-!     Plastic dissipation power density
-      statev_outputs(19) = 0
+!     Plastic dissipation power density: statev_plasdiss
+      statev_outputs(19) = 1
 !     
 !     20st State-variable output / number of outputs: 1
 !     Fatemi Socie parameter
@@ -138,8 +138,8 @@
       statev_outputs(22) = 0
 !
 !     23rd State-variable output / number of outputs: 1
-!     Rotation
-      statev_outputs(23) = 0
+!     Rotation: statev_theta
+      statev_outputs(23) = 1
 !
 !     24-30 custom outputs
 !     Need to be defined here!
@@ -166,7 +166,22 @@
       statev_outputs(32) = 1
 !<<<<<By Shiwei 2026/06/12
 !
-!
+      
+!<<<<<By Shiwei 2026/06/23
+!     33 state-variable output / number of outputs: 6
+!     stress sigma
+      statev_outputs(33) = 1
+      
+!     34 state-variable output / number of outputs: 9
+!     Fp plastic deformation gradient
+      statev_outputs(34) = 1
+      
+!     35 state-variable output / number of outputs: 9
+!     Fth thermal deformation gradient  
+      statev_outputs(35) = 1
+      
+      
+!<<<<<By Shiwei 2026/06/23      
 !
 !     
 !     Count the user-defined outputs
@@ -256,6 +271,20 @@
       endif      
 !<<<<<By Shiwei 2026/06/12
 !
+!<<<<<By Shiwei 2026/06/23   
+!     stress
+      if (statev_outputs(33)==1) then
+          nstatv_outputs=nstatv_outputs+6
+      endif  
+!     plastic deformation gradient      
+      if (statev_outputs(34)==1) then
+          nstatv_outputs=nstatv_outputs+9
+      endif  
+!     thermal deformation gradient      
+      if (statev_outputs(35)==1) then
+          nstatv_outputs=nstatv_outputs+9
+      endif  
+!<<<<<By Shiwei 2026/06/23   
 !     Custom outputs need to be filled here!      
 !
 !
@@ -346,6 +375,10 @@
 !<<<<<By Shiwei 2026/06/12
 !     32£ºdistance from integration point to grain boundary
 !<<<<<By Shiwei 2026/06/12
+!<<<<<By Shiwei 2026/06/23
+!     33 stress sigma (6)  
+!     34 Fp plastic deformation gradient (9)
+!     35 Fth thermal deformation gradient (9)
 !
 !
 !
@@ -960,10 +993,124 @@ C     File name: jobname_STATEV_legend.txt
 !
       endif
 !<<<<<By Shiwei 2026/06/12
+!
+!<<<<<By Shiwei 2026/06/23
+!     State variable-33
+      if (statev_outputs(33) == 1) then
+!
+          do i = 1, 6
+!
+              count = count + 1
+!
+              select case(i)
+!
+              case(1)
+                  ij = 'xx'
+              case(2)
+                  ij = 'yy'
+              case(3)
+                  ij = 'zz'
+              case(4)
+                  ij = 'xy'
+              case(5)
+                  ij = 'xz'
+              case(6)
+                  ij = 'yz'                  
+!
+              end select
+!
+!             
+!
+              write(100,'(A7,I3,A36,A2,A6)')
+     + 'STATEV-', count, 
+     + ':   Cauchy stress -',  ij,  ' [MPa]'
+!
+          end do
+!
+      endif
+      !     State variable-34
+      if (statev_outputs(34) == 1) then
+!
+          do i = 1, 9
+!
+              count = count + 1
+!
+              select case(i)
+!
+              case(1)
+                  ij = 'xx'
+              case(2)
+                  ij = 'xy'
+              case(3)
+                  ij = 'xz'
+              case(4)
+                  ij = 'yx'
+              case(5)
+                  ij = 'yy'
+              case(6)
+                  ij = 'yz'
+              case(7)
+                  ij = 'zx'
+              case(8)
+                  ij = 'zy'
+              case(9)
+                  ij = 'zz'  
+!
+              end select
+!
+!
+!
+              write(100,'(A7,I3,A40,A2,A15)')
+     + 'STATEV-', count, 
+     + ':   Plastic deformation gradient',  ij,  ' [-]'
+!
+          end do
+!
+!
+      endif
+      !     State variable-35
+      if (statev_outputs(35) == 1) then
+!
+          do i = 1, 9
+!
+              count = count + 1
+!
+              select case(i)
+!
+              case(1)
+                  ij = 'xx'
+              case(2)
+                  ij = 'xy'
+              case(3)
+                  ij = 'xz'
+              case(4)
+                  ij = 'yx'
+              case(5)
+                  ij = 'yy'
+              case(6)
+                  ij = 'yz'
+              case(7)
+                  ij = 'zx'
+              case(8)
+                  ij = 'zy'
+              case(9)
+                  ij = 'zz'  
+!
+              end select
+!
+!
+!
+              write(100,'(A7,I3,A40,A2,A15)')
+     + 'STATEV-', count, 
+     + ':   Thermal deformation gradient',  ij,  ' [-]'
+!
+          end do
+!
+!
+      endif
+!<<<<<By Shiwei 2026/06/23
       close(100)
-!
-!
-!
+
 !
 !
 !
@@ -979,15 +1126,16 @@ C     File name: jobname_STATEV_legend.txt
       subroutine assignoutputs(noel,npt,nstatv,statev)
       use globalvariables, only: statev_gmatinv,
      + statev_evmp, statev_maxx, statev_Eec,
-     + statev_curvature, statev_backstress_t,
+     + statev_curvature, statev_backstress,!  original: statev_backstress_t
      + statev_ssdtot, statev_substructure,
      + statev_tausolute, statev_totgammasum,
      + statev_gammasum, statev_gammadot,
-     + statev_tauceff, statev_ssd, statev_loop, statev_gnd_t,
+     + statev_tauceff, statev_ssd, statev_loop, statev_gnd,!  original: statev_gnd_t
      + statev_forest, statev_plasdiss, statev_theta, statev_GamImp,
-     + statev_dist2gb
-!                ^
-!<<<<<<By Shiwei 2026/06/12
+     + statev_dist2gb, statev_tauc, statev_sigma, statev_Fp, statev_Fth
+!                ^            ^            ^
+!<<<<<<By Shiwei 2026/06/12   |            |
+!<<<<<<By Shiwei 2026/06/23---|-------------
 !                                                             ^
 !<<<<<<By Shiwei 2026/06/09-----------------------------------|
       use userinputs, only: maxnslip, maxnloop, nimpede
@@ -1006,7 +1154,7 @@ C     File name: jobname_STATEV_legend.txt
 !     Values of state variables
       real(8), intent(inout) :: statev(nstatv)
 !     Other variables
-      integer :: i, j, k
+      integer :: i, j, k, row, col
       real(8) :: d6(6), d9(9), d1
       real(8) :: gnd(maxnslip*2)
       real(8) :: eps, SSA(maxnslip)
@@ -1041,8 +1189,11 @@ C     File name: jobname_STATEV_legend.txt
 !<<<<<By Shiwei 2026/06/12
 !     32£ºdistance from ip to gb
 !<<<<<By Shiwei 2026/06/12
-!
-!
+!<<<<<By Shiwei 2026/06/23
+!     33: sigma
+!     34: Plastic deformation gradient
+!     35: Thermal deformation gradient
+!<<<<<By Shiwei 2026/06/23
 !     Reset the counter
       i=0
 !
@@ -1186,7 +1337,13 @@ C     File name: jobname_STATEV_legend.txt
 !
           do j = 1, maxnslip
               i = i + 1
-              statev(i) = statev_tauceff(noel,npt,j)
+              
+!<<<<<By Shiwei 2026/06/23
+!             As explained by ChatGPT, usually tauceff is the combination of 
+!                 multiple components, such as forest, ssd dislocation and so on.
+              !statev(i) = statev_tauceff(noel,npt,j)
+              statev(i) = statev_tauc(noel,npt,j)
+!<<<<<By Shiwei 2026/06/23
           end do
 !      
       end if    
@@ -1210,7 +1367,7 @@ C     File name: jobname_STATEV_legend.txt
 !
           do j = 1, maxnslip*2
               i = i + 1
-              statev(i) = statev_gnd_t(noel,npt,j)
+              statev(i) = statev_gnd(noel,npt,j)    !   original: statev_gnd_t
           end do
 !
       end if
@@ -1245,7 +1402,7 @@ C     File name: jobname_STATEV_legend.txt
 !
           do j = 1, maxnslip
               i = i + 1
-              statev(i) = statev_backstress_t(noel,npt,j)
+              statev(i) = statev_backstress(noel,npt,j)
           end do
 !
       end if
@@ -1255,7 +1412,7 @@ C     File name: jobname_STATEV_legend.txt
       if (statev_outputs(18)==1) then
 !
           i = i + 1
-          gnd = statev_gnd_t(noel,npt,1:2*maxnslip)
+          gnd = statev_gnd(noel,npt,1:2*maxnslip) !   original: statev_gnd_t
           statev(i) = sqrt(sum(gnd*gnd))
 !
       end if
@@ -1341,8 +1498,41 @@ C     File name: jobname_STATEV_legend.txt
           end do
       end if
 !<<<<<By Shiwei 2026/06/12
+!<<<<<By Shiwei 2026/06/23
+      !     stress sigma
+      if (statev_outputs(33)==1) then
+          do k=1,6
+              i=i+1
+              statev(i)=statev_sigma(noel,npt,k)
+          end do          
+      end if
+
+!     Fp plastic deformation gradient
+      if (statev_outputs(34)==1) then
+!         
+          do row=1,3
+              do col=1,3
 !
+                  i = i + 1
+                  statev(i)=statev_Fp(noel,npt,row,col)
 !
+              end do        
+          end do
+
+      end if
+      
+!     Fth thermal deformation gradient    
+      if (statev_outputs(35)==1) then
+!
+          do row=1,3
+              do col=1,3
+!
+                  i = i + 1
+                  statev(i)=statev_Fth(noel,npt,row,col)
+              end do
+          end do         
+      end if
+!<<<<<By Shiwei 2026/06/23
 !
       return
       end subroutine assignoutputs
