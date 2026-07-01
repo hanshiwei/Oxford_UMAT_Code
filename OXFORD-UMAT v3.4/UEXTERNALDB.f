@@ -71,22 +71,22 @@
 !
       
       !     turn VS debugger on/off on 2026/05/06
-!      if (first_debug) then
-!
-!          write(6,*) '========================================='
-!          write(6,*) 'UEXTERNALDB is waiting for Visual Studio debugger'
-!          write(6,*) 'Attach to standard.exe, then set debugwait = 0'
-!          write(6,*) '========================================='
-!          call flush(6)
-!
-!          do while (debugwait .eq. 1)
-!!             Keep waiting here
-!              read(5,*) debugwait
-!          end do
-!
-!          first_debug = .false.
-!
-!      endif
+      if (first_debug) then
+
+          write(*,*) '========================================='
+          write(*,*) 'UEXTERNALDB is waiting for Visual Studio debugger'
+          write(*,*) 'Attach to standard.exe, then set debugwait = 0'
+          write(*,*) '========================================='
+          !call flush(6)
+
+          do while (debugwait .eq. 1)
+!             Keep waiting here
+              read(5,*) debugwait
+          end do
+
+          first_debug = .false.
+
+      endif
 !<<<<<by Shiwei 2026/06/10
       
 !     at the start of the analysis (only ONCE!)
@@ -404,6 +404,8 @@
 !     at the beginning of a restart analysis
       if (LOP==4) then
           write(*,*)'LOP==4-restart',init_once,numel,numpt
+          
+          !write(*,*)'LOP==4-restart: KSTEP, KINC',KSTEP, KINC
           
           call initialize_variables
           
