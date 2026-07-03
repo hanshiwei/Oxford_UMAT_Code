@@ -194,7 +194,7 @@
 !<<<<<by Shiwei 2026/06/09
 
 !     Default value is set to 0
-      integer, parameter, public :: backstressmodel = 11
+      integer, parameter, public :: backstressmodel = 1
       
 !<<<<<by Shiwei 2026/06/09
 !     number of impeded terms for dislocation well model

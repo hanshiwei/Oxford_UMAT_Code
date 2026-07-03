@@ -203,6 +203,42 @@
       integer :: i, j, k, is, js
 !
 !
+!<<<<<By Shiwei 2026/07/02
+      integer, parameter :: max_num_temp = 4
+      integer :: ntemp
+
+      real(8) :: temp_list(max_num_temp)
+      
+      real(8) :: xtauc1_list(max_num_temp)
+      
+      real(8) :: n_expo_list(max_num_temp)
+      real(8) :: n_expo
+      
+      real(8) :: hd_h0_list(max_num_temp),hd_ss_list(max_num_temp),
+     + hd_a_list(max_num_temp),hd_q_list(max_num_temp) 
+      
+      real(8) :: alpha1_list(max_num_temp),alpha2_list(max_num_temp),
+     + alpha3_list(max_num_temp)
+      
+      real(8) :: C11_list(max_num_temp),C12_list(max_num_temp),
+     + C44_list(max_num_temp)
+      
+      real(8) :: dsw_k_list(max_num_temp),
+     + dsw_f1_list(max_num_temp),dsw_f2_list(max_num_temp),
+     + dsw_p1_list(max_num_temp),dsw_p2_list(max_num_temp),
+     + dsw_h1_list(max_num_temp),dsw_h2_list(max_num_temp)      
+      
+      real(8) :: dsw_k
+      real(8) :: dsw_f1, dsw_h1, dsw_p1, dsw_f2, dsw_h2, dsw_p2
+      
+      real(8) :: af_h_list(max_num_temp),af_hD_list(max_num_temp)
+      
+      real(8) :: af_h, af_hD
+      
+      real(8) :: hd_h0, hd_ss, hd_a, hd_q
+      
+      
+!<<<<<By Shiwei 2026/07/02      
 !
 !     Set potentially unassigned parameters to zero
 !     Slip parameters
@@ -393,7 +429,11 @@
           iphase = 2
 !
 !
-!
+!<<<<<By Shiwei 2026/07/02
+          ntemp = 4
+
+          temp_list(1:ntemp)=(/293.0d0, 623.0d0, 773.0d0, 1100.0d0/)
+!<<<<<By Shiwei 2026/07/02
 !         Slip model
 !         power law
           slipmodel = 3
@@ -403,7 +443,20 @@
           slipparam(1) = 1.0d-3
 !         rate sensitivity exponent
 !          slipparam(2) = 83.333
-          slipparam(2) = 20.
+!<<<<<By Shiwei 2026/07/02
+          !slipparam(2) = 20.
+
+          n_expo_list(1:ntemp)=(/15.0d0, 9.0d0, 6.0d0, 4.0d0/)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + n_expo_list, n_expo)
+          if (n_expo .le. 0.) then
+             write(*,*) 'Negative slip rate sensitivity exponent!' 
+             call xit
+          endif
+             
+          slipparam(2) = n_expo
+!<<<<<By Shiwei 2026/07/02
 !
 !!         Inverse slip test parameters
 !!         Slip model parameters
@@ -455,7 +508,16 @@
 !          xtauc1 = 32.
 !
 !         Copper
-          xtauc1 = 30.0
+!<<<<<By Shiwei 2025/12/01
+          !   Initial slip resistance
+          !xtauc1 = 32.  !original
+          
+          xtauc1_list = (/60.0, 30.91, 15.0, 8.0/)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + xtauc1_list, xtauc1)
+!<<<<<By Shiwei 2025/12/01                
+          
 !
 !!         Inverse slip test parameter
 !          xtauc1 = 32.
@@ -465,9 +527,23 @@
 !
 !
 !         thermal expansion coefficients
-          alpha1 = 0.
-          alpha2 = 0.
-          alpha3 = 0.
+!<<<<<By Shiwei 2026/07/02          
+          !alpha1 = 0.    !   original value
+          !alpha2 = 0.    !   original value
+          !alpha3 = 0.    !   original value
+          
+          alpha1_list = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
+          alpha2_list = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
+          alpha3_list = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + alpha1_list, alpha1)
+          call params_interp(temperature,temp_list,ntemp,
+     + alpha2_list, alpha2)
+          call params_interp(temperature,temp_list,ntemp,
+     + alpha3_list, alpha3)
+!<<<<<By Shiwei 2026/07/02      
+
 !
 !     Example elastic modulus values
 !     **********************************************************
@@ -523,9 +599,26 @@
 !
 !         Cubic elastic constants [MPa]
 !         Value used for copper
-          C11 = 170.d3
-          C12 = 124.d3
-          C44 = 75.d3
+          
+!<<<<<By Shiwei 2026/07/02      
+          !C11 = 170.d3
+          !C12 = 124.d3
+          !C44 = 75.d3
+          
+          C11_list = (/231823.0,210588.0,152590.0,132590.0/)
+          C12_list = (/147097.0,133623.0, 96833.0, 76833.0/)
+          C44_list = (/ 51729.0, 46991.0, 34053.0, 30053.0/)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + C11_list, C11)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + C12_list, C12)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + C44_list, C44)
+!<<<<<By Shiwei 2026/07/02  
+
 !!         E=100 GPa and nu=0.3
 !          C11 = 134.6154d3
 !          C12 = 57.6923d3
@@ -563,15 +656,47 @@
 !         hardening model-integral type voce model
           hardeningmodel = 1
 !         
-!         Hardening rate - h0
-          hardeningparam(1)=250.
+!<<<<<By Shiwei 2026/07/02      
+!         Hardening rate - h0 
+          !hardeningparam(1)=250. !original value
 !         Saturation strength for slip - ss
-          hardeningparam(2)=35.
+          !hardeningparam(2)=35.   !original value
 !         Hardening exponent - a
-          hardeningparam(3)=1.0
+          !hardeningparam(3)=1.0   !original value
 !         Latent hardening coefficient - q
-          hardeningparam(4)=1.4
+          !hardeningparam(4)=1.4   !original value
           
+          !C11 = 170.d3
+          !C12 = 124.d3
+          !C44 = 75.d3
+          
+          hd_h0_list = (/250.0,200.0,150.0,100.0/)
+          hd_ss_list = (/57.0,28.0, 13.0, 6.5/)          
+          hd_a_list = (/ 1.0, 1.0, 1.0, 1.0/)
+          hd_q_list = (/ 0.0,0.0,0.0,0.0/)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + hd_h0_list, hd_h0)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + hd_ss_list, hd_ss)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + hd_a_list, hd_a)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + hd_a_list, hd_q)
+          
+!         Hardening rate - h0 
+          hardeningparam(1)=hd_h0
+!         Saturation strength for slip - ss
+          hardeningparam(2)=hd_ss
+!         Hardening exponent - a
+          hardeningparam(3)=hd_a
+!         Latent hardening coefficient - q
+          hardeningparam(4)=hd_q  
+!<<<<<By Shiwei 2026/07/02  
+
 !
 !!     Kocks-Mecking hardening with substructure evolution
 !!     Reference: https://doi.org/10.1016/j.actamat.2010.06.021
@@ -645,27 +770,114 @@
           !dislocation well model
           
           !backstressparam(1) = 800860.0   !   mouduli: dsw_c
-          backstressparam(1) = 10000.0   !   mouduli: dsw_c
-          
-          backstressparam(2) = 0.5      !   1st term: dsw_f1 (fraction)
-          backstressparam(3) = 0.0005  !   1st term: dsw_h1->using constant capacity
-          backstressparam(4) = 0.5879     !   1st term: dsw_p1
-          
-          backstressparam(5) = 0.5      !   2nd term: dsw_f2 (fraction)
-          backstressparam(6) = 0.0002   !   2nd term: dsw_h2->using constant capacity
-          backstressparam(7) = 0.34       !   2nd term: dsw_p2
+          !backstressparam(1) = 10000.0   !   mouduli: dsw_c
+          !
+          !backstressparam(2) = 0.5      !   1st term: dsw_f1 (fraction)
+          !backstressparam(3) = 0.0005  !   1st term: dsw_h1->using constant capacity
+          !backstressparam(4) = 0.5879     !   1st term: dsw_p1
+          !
+          !backstressparam(5) = 0.5      !   2nd term: dsw_f2 (fraction)
+          !backstressparam(6) = 0.0002   !   2nd term: dsw_h2->using constant capacity
+          !backstressparam(7) = 0.34       !   2nd term: dsw_p2
 !          !
 !!         we are using hyperbolic secant function for capacity of impeded strain
 !!         h=2*a/(exp(+bx)+exp(-bx))+c
-          backstressparam(8) = 5.0e-4     !   1st term: a->nominator 
-          backstressparam(9) = 800.0      !   1st term: b->exponent
-          backstressparam(10)= 1.0e-5     !   1st term: c->constant
+          !backstressparam(8) = 5.0e-4     !   1st term: a->nominator 
+          !backstressparam(9) = 800.0      !   1st term: b->exponent
+          !backstressparam(10)= 1.0e-5     !   1st term: c->constant
+          !
+          !backstressparam(11) = 5.0e-4    !   2nd term: a->nominator 
+          !backstressparam(12) = 800.0     !   2nd term: b->exponent
+          !backstressparam(13)= 1.0e-5     !   2nd term: c->constant
           
-          backstressparam(11) = 5.0e-4    !   2nd term: a->nominator 
-          backstressparam(12) = 800.0     !   2nd term: b->exponent
-          backstressparam(13)= 1.0e-5     !   2nd term: c->constant
+!<<<<<By Shiwei 2026/06/09  
           
-!<<<<<By Shiwei 2026/06/09          
+!<<<<<By Shiwei 2026/07/02
+!   dislocation well model
+!   two terms of dsw
+      !    dwm_k_list  = (/26086.0, 14015.0, 9127.0, 9127.0/)
+          
+!       fisrt term of the dsw
+      !    dwm_f1_list = (/0.672, 0.672, 0.672/)
+      !    dwm_h1_list = (/0.0004585,0.0004585,0.0004585,0.0004585/)
+      !    dwm_p1_list = (/0.5879,0.5879,0.5879,0.5879/)
+!       second term of the dsw
+      !    dwm_f2_list = (/0.328, 0.328, 0.328, 0.328/)
+      !    dwm_h2_list = (/0.000258, 0.000258, 0.000258, 0.000258/)
+      !    dwm_p2_list = (/0.34, 0.34, 0.34, 0.34/)
+          
+!    we are using hyperbolic secant function for capacity of impeded strain
+!    h=2*a/(exp(+bx)+exp(-bx))+c    
+      !    dwm_a1_list = (/5.0e-4, 5.0e-4,5.0e-4,5.0e-4,/)
+      !    dwm_b1_list = (/800.0,800.0,800.0,800.0/)
+      !    dwm_c1_list = (/1.0e-5,1.0e-5,1.0e-5,1.0e-5/)
+      !    !   second term of the dsw
+      !    dwm_a2_list = (/5.0e-4, 5.0e-4,5.0e-4,5.0e-4,/)
+      !    dwm_b2_list = (/800.0,800.0,800.0,800.0/)
+      !    dwm_c2_list = (/1.0e-5,1.0e-5,1.0e-5,1.0e-5/)   
+      !    
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dwm_k_list,  dwm_k)
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dwm_f1_list, dwm_f1)
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dsw_h1_list, dsw_h1)
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dsw_p1_list, dsw_p1)
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dsw_f2_list, dsw_f2)
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dsw_h2_list, dsw_h2)
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dsw_p2_list, dsw_p2)
+      
+      !    
+      !    backstressparam(1) = dsw_k
+          
+      !    backstressparam(2) = dsw_f1
+      !    backstressparam(3) = dsw_h1
+      !    backstressparam(4) = dsw_p1
+          
+      !    backstressparam(5) = dsw_f2
+      !    backstressparam(6) = dsw_h2
+      !    backstressparam(7) = dsw_p2
+          
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dwm_a1_list, dwm_a1)
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dsw_b1_list, dsw_b1)
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dsw_c1_list, dsw_c1)
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dsw_a2_list, dsw_a2)
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dsw_b2_list, dsw_b2)
+      !    call params_interp(temperature,temp_list,ntemp,
+      !+ dsw_c2_list, dsw_c2)    
+          
+      !   backstressparam(8) = dwm_a1     !   1st term: a->nominator 
+      !   backstressparam(9) = dsw_h1     !   1st term: b->exponent
+      !   backstressparam(10)= dsw_c1     !   1st term: c->constant
+      
+      !   backstressparam(11) = dwm_a2    !   2nd term: a->nominator 
+      !   backstressparam(12) = dsw_h2    !   2nd term: b->exponent
+      !   backstressparam(13) = dsw_c2    !   2nd term: c->constant
+          
+          !   embeded A-F backstress model-1
+          af_h_list = (/26086.0, 14015.0, 9127.0, 8127.0/)
+          af_hD_list = (/1373.0,  1078.0, 829.0, 729.0/)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + af_h_list,  af_h)
+          
+          call params_interp(temperature,temp_list,ntemp,
+     + af_hD_list, af_hD)
+          
+          backstressparam(1) = af_h
+          backstressparam(2) = af_hD
+          
+          
+!<<<<<By Shiwei 2026/07/02 
 !
 !     custom material - hcp (i.e. zirconium)
 !     no temperature dependence
@@ -2222,6 +2434,61 @@
 !
 !    
 !
+!<<<<<By Shiwei 2026/07/02
+      subroutine params_interp(temp, temp_list, n, param_list, param)
+      implicit none
+      integer, intent(in) :: n                    ! number of temps
+      
+      real(8), intent(in) :: temp                ! temp input
+      real(8), intent(in) :: temp_list(n)        ! temp list
+      real(8), intent(in) :: param_list(n)       ! param_list
+      real(8), intent(out) :: param                ! output param
+      
+      integer :: i1, i2, i
+      real(8) :: t1, t2, y1, y2, slope
+
+      ! basic requirement: at least 2 points for interpolation
+      if (n < 2) then
+          param = param_list(1)
+          return
+      end if
+      
+      ! === 2. if temp is above the max, choose max value ===
+      if (temp >= temp_list(n)) then
+          !i1 = n-1
+          !i2 = n
+          param = param_list(n)
+          return
+      endif
+          
+      ! === 1. if temp is below the min, choose min value ===
+      if (temp <= temp_list(1)) then
+          !i1 = 1
+          !i2 = 2
+          param = param_list(1)
+          return
+      endif
+          
+      ! === 3. find the pair that contains temp
+      do i = 1, n - 1
+          if (temp>=temp_list(i).and.temp<=temp_list(i+1)) then
+              i1 = i
+              i2 = i + 1
+              exit
+          end if
+      end do
+      
+      t1 = temp_list(i1)
+      t2 = temp_list(i2)
+      y1 = param_list(i1)
+      y2 = param_list(i2)
+
+      ! linear interpolation
+      slope = (y2 - y1) / (t2 - t1)
+      param   = y1 + slope * (temp - t1)    
+      
+      return
+      end subroutine params_interp
 !
-!
+!<<<<<By Shiwei 2026/07/02
       end module usermaterials

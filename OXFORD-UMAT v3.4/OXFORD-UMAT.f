@@ -137,9 +137,9 @@
 !
 !     turn VS debugger on/off
       debug=0
-      do while (debug==1)
-          debugwait = 1
-      end do
+      !do while (debug==1)
+      !    debugwait = 1
+      !end do
 !
 !     to avoid warning messages set the following to zero
       DDSDDT = 0.
