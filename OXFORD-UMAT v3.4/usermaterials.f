@@ -512,7 +512,7 @@
           !   Initial slip resistance
           !xtauc1 = 32.  !original
           
-          xtauc1_list = (/60.0, 30.91, 15.0, 8.0/)
+          xtauc1_list(1:ntemp) = (/60.0, 30.91, 15.0, 8.0/)
           
           call params_interp(temperature,temp_list,ntemp,
      + xtauc1_list, xtauc1)
@@ -532,9 +532,9 @@
           !alpha2 = 0.    !   original value
           !alpha3 = 0.    !   original value
           
-          alpha1_list = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
-          alpha2_list = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
-          alpha3_list = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
+          alpha1_list(1:ntemp) = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
+          alpha2_list(1:ntemp) = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
+          alpha3_list(1:ntemp) = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
           
           call params_interp(temperature,temp_list,ntemp,
      + alpha1_list, alpha1)
@@ -605,9 +605,9 @@
           !C12 = 124.d3
           !C44 = 75.d3
           
-          C11_list = (/231823.0,210588.0,152590.0,132590.0/)
-          C12_list = (/147097.0,133623.0, 96833.0, 76833.0/)
-          C44_list = (/ 51729.0, 46991.0, 34053.0, 30053.0/)
+          C11_list(1:ntemp) = (/231823.0,210588.0,152590.0,132590.0/)
+          C12_list(1:ntemp) = (/147097.0,133623.0, 96833.0, 76833.0/)
+          C44_list(1:ntemp) = (/ 51729.0, 46991.0, 34053.0, 30053.0/)
           
           call params_interp(temperature,temp_list,ntemp,
      + C11_list, C11)
@@ -670,10 +670,10 @@
           !C12 = 124.d3
           !C44 = 75.d3
           
-          hd_h0_list = (/250.0,200.0,150.0,100.0/)
-          hd_ss_list = (/57.0,28.0, 13.0, 6.5/)          
-          hd_a_list = (/ 1.0, 1.0, 1.0, 1.0/)
-          hd_q_list = (/ 0.0,0.0,0.0,0.0/)
+          hd_h0_list(1:ntemp) = (/250.0,200.0,150.0,100.0/)
+          hd_ss_list(1:ntemp) = (/57.0,28.0, 13.0, 6.5/)          
+          hd_a_list(1:ntemp) = (/ 1.0, 1.0, 1.0, 1.0/)
+          hd_q_list(1:ntemp) = (/ 0.0,0.0,0.0,0.0/)
           
           call params_interp(temperature,temp_list,ntemp,
      + hd_h0_list, hd_h0)
@@ -795,26 +795,26 @@
 !<<<<<By Shiwei 2026/07/02
 !   dislocation well model
 !   two terms of dsw
-      !    dwm_k_list  = (/26086.0, 14015.0, 9127.0, 9127.0/)
+      !    dwm_k_list(1:ntemp)  = (/26086.0, 14015.0, 9127.0, 9127.0/)
           
 !       fisrt term of the dsw
-      !    dwm_f1_list = (/0.672, 0.672, 0.672/)
-      !    dwm_h1_list = (/0.0004585,0.0004585,0.0004585,0.0004585/)
-      !    dwm_p1_list = (/0.5879,0.5879,0.5879,0.5879/)
+      !    dwm_f1_list(1:ntemp) = (/0.672, 0.672, 0.672/)
+      !    dwm_h1_list(1:ntemp) = (/0.0004585,0.0004585,0.0004585,0.0004585/)
+      !    dwm_p1_list(1:ntemp) = (/0.5879,0.5879,0.5879,0.5879/)
 !       second term of the dsw
-      !    dwm_f2_list = (/0.328, 0.328, 0.328, 0.328/)
-      !    dwm_h2_list = (/0.000258, 0.000258, 0.000258, 0.000258/)
-      !    dwm_p2_list = (/0.34, 0.34, 0.34, 0.34/)
+      !    dwm_f2_list(1:ntemp) = (/0.328, 0.328, 0.328, 0.328/)
+      !    dwm_h2_list(1:ntemp) = (/0.000258, 0.000258, 0.000258, 0.000258/)
+      !    dwm_p2_list(1:ntemp) = (/0.34, 0.34, 0.34, 0.34/)
           
 !    we are using hyperbolic secant function for capacity of impeded strain
 !    h=2*a/(exp(+bx)+exp(-bx))+c    
-      !    dwm_a1_list = (/5.0e-4, 5.0e-4,5.0e-4,5.0e-4,/)
-      !    dwm_b1_list = (/800.0,800.0,800.0,800.0/)
-      !    dwm_c1_list = (/1.0e-5,1.0e-5,1.0e-5,1.0e-5/)
+      !    dwm_a1_list(1:ntemp) = (/5.0e-4, 5.0e-4,5.0e-4,5.0e-4,/)
+      !    dwm_b1_list(1:ntemp) = (/800.0,800.0,800.0,800.0/)
+      !    dwm_c1_list(1:ntemp) = (/1.0e-5,1.0e-5,1.0e-5,1.0e-5/)
       !    !   second term of the dsw
-      !    dwm_a2_list = (/5.0e-4, 5.0e-4,5.0e-4,5.0e-4,/)
-      !    dwm_b2_list = (/800.0,800.0,800.0,800.0/)
-      !    dwm_c2_list = (/1.0e-5,1.0e-5,1.0e-5,1.0e-5/)   
+      !    dwm_a2_list(1:ntemp) = (/5.0e-4, 5.0e-4,5.0e-4,5.0e-4,/)
+      !    dwm_b2_list(1:ntemp) = (/800.0,800.0,800.0,800.0/)
+      !    dwm_c2_list(1:ntemp) = (/1.0e-5,1.0e-5,1.0e-5,1.0e-5/)   
       !    
       !    call params_interp(temperature,temp_list,ntemp,
       !+ dwm_k_list,  dwm_k)
@@ -864,8 +864,8 @@
       !   backstressparam(13) = dsw_c2    !   2nd term: c->constant
           
           !   embeded A-F backstress model-1
-          af_h_list = (/26086.0, 14015.0, 9127.0, 8127.0/)
-          af_hD_list = (/1373.0,  1078.0, 829.0, 729.0/)
+          af_h_list(1:ntemp) = (/26086.0, 14015.0, 9127.0, 8127.0/)
+          af_hD_list(1:ntemp) = (/1373.0,  1078.0, 829.0, 729.0/)
           
           call params_interp(temperature,temp_list,ntemp,
      + af_h_list,  af_h)
