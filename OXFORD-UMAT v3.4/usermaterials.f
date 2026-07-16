@@ -444,18 +444,18 @@
 !         rate sensitivity exponent
 !          slipparam(2) = 83.333
 !<<<<<By Shiwei 2026/07/02
-          !slipparam(2) = 20.
+          slipparam(2) = 20.
 
-          n_expo_list(1:ntemp)=(/15.0d0, 9.0d0, 6.0d0, 4.0d0/)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + n_expo_list, n_expo)
-          if (n_expo .le. 0.) then
-             write(*,*) 'Negative slip rate sensitivity exponent!' 
-             call xit
-          endif
-             
-          slipparam(2) = n_expo
+!          n_expo_list(1:ntemp)=(/15.0d0, 9.0d0, 6.0d0, 4.0d0/)
+!          
+!          call params_interp(temperature,temp_list,ntemp,
+!!     + n_expo_list, n_expo)
+!          if (n_expo .le. 0.) then
+!             write(*,*) 'Negative slip rate sensitivity exponent!' 
+!             call xit
+!          endif
+!             
+!          slipparam(2) = n_expo
 !<<<<<By Shiwei 2026/07/02
 !
 !!         Inverse slip test parameters
@@ -510,12 +510,12 @@
 !         Copper
 !<<<<<By Shiwei 2025/12/01
           !   Initial slip resistance
-          !xtauc1 = 32.  !original
+          xtauc1 = 32.  !original
           
-          xtauc1_list(1:ntemp) = (/60.0, 30.91, 15.0, 8.0/)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + xtauc1_list, xtauc1)
+!          xtauc1_list(1:ntemp) = (/60.0, 30.91, 15.0, 8.0/)
+!          
+!          call params_interp(temperature,temp_list,ntemp,
+!!     + xtauc1_list, xtauc1)
 !<<<<<By Shiwei 2025/12/01                
           
 !
@@ -528,20 +528,20 @@
 !
 !         thermal expansion coefficients
 !<<<<<By Shiwei 2026/07/02          
-          !alpha1 = 0.    !   original value
-          !alpha2 = 0.    !   original value
-          !alpha3 = 0.    !   original value
+          alpha1 = 0.    !   original value
+          alpha2 = 0.    !   original value
+          alpha3 = 0.    !   original value
           
-          alpha1_list(1:ntemp) = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
-          alpha2_list(1:ntemp) = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
-          alpha3_list(1:ntemp) = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + alpha1_list, alpha1)
-          call params_interp(temperature,temp_list,ntemp,
-     + alpha2_list, alpha2)
-          call params_interp(temperature,temp_list,ntemp,
-     + alpha3_list, alpha3)
+!          alpha1_list(1:ntemp) = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
+!          alpha2_list(1:ntemp) = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
+!          alpha3_list(1:ntemp) = (/1.76e-5, 1.76e-5, 1.76e-5, 1.76e-5/)
+!          
+!          call params_interp(temperature,temp_list,ntemp,
+!!     + alpha1_list, alpha1)
+!          call params_interp(temperature,temp_list,ntemp,
+!!     + alpha2_list, alpha2)
+!          call params_interp(temperature,temp_list,ntemp,
+!!     + alpha3_list, alpha3)
 !<<<<<By Shiwei 2026/07/02      
 
 !
@@ -601,22 +601,19 @@
 !         Value used for copper
           
 !<<<<<By Shiwei 2026/07/02      
-          !C11 = 170.d3
-          !C12 = 124.d3
-          !C44 = 75.d3
+          C11 = 170.d3
+          C12 = 124.d3
+          C44 = 75.d3
           
-          C11_list(1:ntemp) = (/231823.0,210588.0,152590.0,132590.0/)
-          C12_list(1:ntemp) = (/147097.0,133623.0, 96833.0, 76833.0/)
-          C44_list(1:ntemp) = (/ 51729.0, 46991.0, 34053.0, 30053.0/)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + C11_list, C11)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + C12_list, C12)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + C44_list, C44)
+          !C11_list(1:ntemp) = (/231823.0,210588.0,152590.0,132590.0/)
+          !C12_list(1:ntemp) = (/147097.0,133623.0, 96833.0, 76833.0/)
+          !C44_list(1:ntemp) = (/ 51729.0, 46991.0, 34053.0, 30053.0/)
+          !
+          !call params_interp(temperature,temp_list,ntemp,C11_list, C11)
+          !
+          !call params_interp(temperature,temp_list,ntemp,C12_list, C12)
+          !
+          !call params_interp(temperature,temp_list,ntemp,C44_list, C44)
 !<<<<<By Shiwei 2026/07/02  
 
 !!         E=100 GPa and nu=0.3
@@ -658,43 +655,43 @@
 !         
 !<<<<<By Shiwei 2026/07/02      
 !         Hardening rate - h0 
-          !hardeningparam(1)=250. !original value
+          hardeningparam(1)=250. !original value
 !         Saturation strength for slip - ss
-          !hardeningparam(2)=35.   !original value
+          hardeningparam(2)=35.   !original value
 !         Hardening exponent - a
-          !hardeningparam(3)=1.0   !original value
+          hardeningparam(3)=1.0   !original value
 !         Latent hardening coefficient - q
-          !hardeningparam(4)=1.4   !original value
+          hardeningparam(4)=1.4   !original value
           
           !C11 = 170.d3
           !C12 = 124.d3
           !C44 = 75.d3
           
-          hd_h0_list(1:ntemp) = (/250.0,200.0,150.0,100.0/)
-          hd_ss_list(1:ntemp) = (/57.0,28.0, 13.0, 6.5/)          
-          hd_a_list(1:ntemp) = (/ 1.0, 1.0, 1.0, 1.0/)
-          hd_q_list(1:ntemp) = (/ 0.0,0.0,0.0,0.0/)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + hd_h0_list, hd_h0)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + hd_ss_list, hd_ss)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + hd_a_list, hd_a)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + hd_a_list, hd_q)
-          
-!         Hardening rate - h0 
-          hardeningparam(1)=hd_h0
-!         Saturation strength for slip - ss
-          hardeningparam(2)=hd_ss
-!         Hardening exponent - a
-          hardeningparam(3)=hd_a
-!         Latent hardening coefficient - q
-          hardeningparam(4)=hd_q  
+!          hd_h0_list(1:ntemp) = (/250.0,200.0,150.0,100.0/)
+!          hd_ss_list(1:ntemp) = (/57.0,28.0, 13.0, 6.5/)          
+!          hd_a_list(1:ntemp) = (/ 1.0, 1.0, 1.0, 1.0/)
+!          hd_q_list(1:ntemp) = (/ 0.0,0.0,0.0,0.0/)
+!          
+!          call params_interp(temperature,temp_list,ntemp,
+!     + hd_h0_list, hd_h0)
+!          
+!          call params_interp(temperature,temp_list,ntemp,
+!     + hd_ss_list, hd_ss)
+!          
+!          call params_interp(temperature,temp_list,ntemp,
+!     + hd_a_list, hd_a)
+!          
+!          call params_interp(temperature,temp_list,ntemp,
+!     + hd_a_list, hd_q)
+!          
+!!         Hardening rate - h0 
+!          hardeningparam(1)=hd_h0
+!!         Saturation strength for slip - ss
+!          hardeningparam(2)=hd_ss
+!!         Hardening exponent - a
+!          hardeningparam(3)=hd_a
+!!         Latent hardening coefficient - q
+!          hardeningparam(4)=hd_q  
 !<<<<<By Shiwei 2026/07/02  
 
 !
@@ -764,8 +761,8 @@
           
 !<<<<<By Shiwei 2026/06/09
 !         testing embeded A-F model
-          !backstressparam(1) = 100000.0
-          !backstressparam(2) = 1000.0
+          backstressparam(1) = 100000.0
+          backstressparam(2) = 1000.0
           
           !dislocation well model
           
@@ -864,17 +861,16 @@
       !   backstressparam(13) = dsw_c2    !   2nd term: c->constant
           
           !   embeded A-F backstress model-1
-          af_h_list(1:ntemp) = (/26086.0, 14015.0, 9127.0, 8127.0/)
-          af_hD_list(1:ntemp) = (/1373.0,  1078.0, 829.0, 729.0/)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + af_h_list,  af_h)
-          
-          call params_interp(temperature,temp_list,ntemp,
-     + af_hD_list, af_hD)
-          
-          backstressparam(1) = af_h
-          backstressparam(2) = af_hD
+!          af_h_list(1:ntemp) = (/26086.0, 14015.0, 9127.0, 8127.0/)
+!          af_hD_list(1:ntemp) = (/1373.0,  1078.0, 829.0, 729.0/)
+!          
+!          call params_interp(temperature,temp_list,ntemp,af_h_list,af_h)
+!          
+!          call params_interp(temperature,temp_list,ntemp,
+!     +af_hD_list,af_hD)
+!          
+!          backstressparam(1) = af_h
+!          backstressparam(2) = af_hD
           
           
 !<<<<<By Shiwei 2026/07/02 
